@@ -1,0 +1,914 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>からだセルフチェック</title>
+<meta name="description" content="痛みと姿勢写真から、からだの使い方の傾向を確認し、イラスト付きの自主練習メニューを作るセルフチェック。受診が必要なサインの確認つき。写真は端末内で処理し、外部に送信しません。">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 上から ①モード選択 ②安全チェック ③痛み ④姿勢写真（横・正面）⑤結果と練習メニュー。画面下に印刷バー */
+:root {
+  --bg: #f3f5f4;
+  --surface: #ffffff;
+  --surface-2: #e9eeec;
+  --ink: #1b2a2f;
+  --ink-2: #4a5b60;
+  --muted: #7a8a8e;
+  --line: #d3dcda;
+  --accent: #1f6f78;
+  --accent-soft: #d6ebec;
+  --ok: #2e7d4f;
+  --warn: #8a6a12;
+  --bad: #b5532f;
+  --warn-soft: #f7ecd8;
+  --bad-soft: #f6e1d8;
+  --left: #2f6db5;       /* 左下肢 */
+  --right: #c0602a;      /* 右下肢 */
+  --f-display: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --f-body: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111a1c; --surface: #182427; --surface-2: #213034; --ink: #e4ecea; --ink-2: #b2c1c0; --muted: #84979a;
+    --line: #2f4247; --accent: #5fb5bd; --accent-soft: #1d3a3e; --ok: #6cc191; --warn: #e0b552; --bad: #e3875f;
+    --warn-soft: #3a2f1c; --bad-soft: #3d241b; --left: #78a9e6; --right: #ec9a62; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111a1c; --surface: #182427; --surface-2: #213034; --ink: #e4ecea; --ink-2: #b2c1c0; --muted: #84979a;
+  --line: #2f4247; --accent: #5fb5bd; --accent-soft: #1d3a3e; --ok: #6cc191; --warn: #e0b552; --bad: #e3875f;
+  --warn-soft: #3a2f1c; --bad-soft: #3d241b; --left: #78a9e6; --right: #ec9a62; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 16px 48px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+header { padding: 22px 0 6px; }
+header h1 { font-size: 26px; font-weight: 900; }
+header p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; margin-top: 16px; }
+.card h2 { font-size: 18px; display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.card h2 .no { font-family: var(--f-num); color: var(--accent); font-size: 15px; }
+.hint { font-size: 13px; color: var(--ink-2); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn { font: inherit; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; text-decoration: none; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+:root[data-theme="dark"] .btn.primary { color: #0d1a1c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.primary { color: #0d1a1c; } }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn input[type=file] { display: none; }
+button:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[type=text], input[type=date] { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; min-width: 0; }
+.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.mode { text-align: left; font: inherit; color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 14px; cursor: pointer; }
+.mode b { display: block; font-family: var(--f-display); font-size: 18px; }
+.mode span { font-size: 13px; color: var(--ink-2); }
+.mode[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: inherit; font-size: 14px; padding: 7px 12px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+:root[data-theme="dark"] .chip[aria-pressed="true"] { color: #0d1a1c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .chip[aria-pressed="true"] { color: #0d1a1c; } }
+.sub { margin: 14px 0 6px; font-size: 14px; font-weight: 700; }
+.nrs { display: flex; align-items: center; gap: 10px; }
+.nrs input { flex: 1; accent-color: var(--accent); }
+.nrs output { font-family: var(--f-num); font-size: 22px; font-weight: 600; min-width: 2ch; text-align: right; }
+.photos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.photo { border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
+.photo h3 { font-size: 16px; }
+.photo canvas { display: block; width: 100%; height: auto; margin-top: 8px; border-radius: 6px; background: var(--surface-2); }
+.photo .st { font-size: 13px; color: var(--ink-2); margin-top: 6px; min-height: 1.4em; }
+.photo .st.err { color: var(--bad); font-weight: 700; }
+table.m { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+table.m th, table.m td { padding: 6px 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+table.m th { font-weight: 700; color: var(--ink-2); font-size: 12px; background: var(--surface-2); }
+table.m td.n { font-family: var(--f-num); white-space: nowrap; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 10px; white-space: nowrap; }
+.tag.ok { color: var(--ok); background: var(--surface-2); }
+.tag.warn { color: var(--warn); background: var(--warn-soft); }
+.tag.bad { color: var(--bad); background: var(--bad-soft); }
+.tag.na { color: var(--muted); background: var(--surface-2); }
+.issue { border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: 6px; padding: 10px 12px; margin-top: 12px; }
+.issue.bad { border-left-color: var(--bad); }
+.issue.info { border-left-color: var(--accent); }
+.issue h3 { font-size: 16px; }
+.issue p { margin: 4px 0 0; font-size: 14px; }
+.issue .basis { color: var(--ink-2); font-size: 13px; }
+.ex { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; padding: 8px 0; border-top: 1px dashed var(--line); }
+.ex:first-of-type { margin-top: 8px; }
+.ex input { margin-top: 5px; width: 18px; height: 18px; }
+.ex b { font-size: 15px; }
+.ex .dose { font-family: var(--f-num); font-size: 13px; color: var(--accent); margin-left: 6px; }
+.ex .how { font-size: 13px; color: var(--ink-2); }
+.ex .caution { font-size: 12px; color: var(--bad); }
+.figw { margin: 8px 0 2px; max-width: 460px; }
+.figw .tip { font-size: 12px; font-weight: 700; color: var(--ink-2); display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.figw .tip i { width: 14px; height: 8px; border-radius: 4px; background: #e8590c; display: inline-block; }
+.fig { display: flex; align-items: flex-start; gap: 4px; }
+.fig figure { margin: 0; flex: 1; min-width: 0; }
+.fig svg { display: block; width: 100%; height: auto; background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+.fig figcaption { font-size: 13px; line-height: 1.45; color: var(--ink); margin-top: 4px; }
+.fig figcaption b { color: var(--accent); }
+.fig .fa { color: var(--accent); font-size: 16px; align-self: center; margin-top: -1.6em; }
+.fig svg polyline, .fig svg path, .fig svg line { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+/* イラストは画面の配色に関係なく白地に描く（印刷と同じ見た目） */
+.fig .near { stroke: #22343a; stroke-width: 5; }
+.fig .near .tr { stroke-width: 8.5; }
+.fig .near .halo { stroke: #fff; stroke-width: 7.5; }
+.fig .hd { fill: #22343a; stroke: #fff; stroke-width: 1.2; }
+.fig .far { stroke: #a8b5b8; stroke-width: 4.6; }
+.fig .gh { stroke: #9aa8ab; stroke-width: 1.3; stroke-dasharray: 2.5 2; fill: none; }
+.fig .gh circle { fill: none; }
+.fig .fl { fill: #eef1f0; }
+.fig .gr { stroke: #8a989b; stroke-width: 1; }
+.fig .pr { stroke: #6f7f83; stroke-width: 2.2; fill: none; stroke-linecap: round; }
+.fig .hatch { stroke: #6f7f83; stroke-width: 1; }
+.fig .mat { fill: #cfe6e8; stroke: #6f9ea3; stroke-width: .6; }
+.fig .towel { fill: #f3d9a6; stroke: #b0812a; stroke-width: 1; }
+.fig .tape { fill: #e0a800; }
+.fig .nt { fill: #1f6f78; font-size: 12px; font-weight: 700; }
+.fig .hl { stroke: #e8590c; }
+.fig .far .hl { stroke: #f08c4f; }
+.fig .hld { fill: #e8590c; stroke: #fff; stroke-width: 1.2; }
+.fig .ar { stroke: #1c7ed6; stroke-width: 2.4; }
+.fig .arh { fill: #1c7ed6; stroke: none; }
+.rfg { margin: 10px 0 2px; font-size: 13px; font-weight: 700; }
+.rfg.em { color: var(--bad); } .rfg.dr { color: var(--warn); }
+.rfq { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.yn { display: flex; gap: 6px; }
+.yn label { cursor: pointer; }
+.yn input { position: absolute; opacity: 0; pointer-events: none; }
+.yn span { display: inline-block; min-width: 64px; text-align: center; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; font-weight: 700; color: var(--ink-2); background: var(--surface); }
+.yn input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.yn input.y:checked + span { background: var(--bad); border-color: var(--bad); color: #fff; }
+.yn input.n:checked + span { background: var(--surface-2); border-color: var(--ink-2); color: var(--ink); }
+.rfbox { margin-top: 12px; border-radius: 8px; padding: 12px 14px; font-size: 14px; border: 1px solid var(--line); background: var(--surface-2); }
+.rfbox b.t { display: block; font-size: 16px; margin-bottom: 4px; }
+.rfbox ul { margin: 4px 0 0; padding-left: 1.3em; }
+.rfbox.em { background: var(--bad-soft); border: 2px solid var(--bad); }
+.rfbox.em b.t { color: var(--bad); }
+.rfbox.dr { background: var(--warn-soft); border: 2px solid var(--warn); }
+.rfbox.dr b.t { color: var(--warn); }
+.rfbox.ok b.t { color: var(--ok); }
+.rfbox label.ov { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; font-weight: 700; cursor: pointer; }
+.rfbox label.ov input { width: 18px; height: 18px; margin-top: 2px; }
+.gate { border-radius: 8px; padding: 12px 14px; margin-top: 10px; font-size: 14px; }
+.gate.em { background: var(--bad-soft); border: 2px solid var(--bad); }
+.gate.dr, .gate.incomplete { background: var(--warn-soft); border: 2px solid var(--warn); }
+details.more { margin-top: 14px; border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; }
+details.more summary { cursor: pointer; font-weight: 700; }
+details.more h4 { margin: 12px 0 0; font-size: 13px; color: var(--accent); }
+.cta { margin-top: 16px; border: 2px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 14px; }
+.cta b { font-family: var(--f-display); font-size: 17px; display: block; }
+.cta p { margin: 4px 0 8px; font-size: 14px; }
+textarea.out { width: 100%; min-height: 180px; font-family: var(--f-num); font-size: 13px; color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 10px; margin-top: 8px; }
+.note { font-size: 12px; color: var(--muted); margin-top: 10px; }
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-size: 14px; z-index: 10; max-width: calc(100% - 32px); }
+.printbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -4px 12px rgba(0,0,0,.08); }
+.printbar .cnt { align-self: center; font-size: 13px; color: var(--ink-2); }
+body.has-bar .wrap { padding-bottom: 96px; }
+body.has-bar .toast { bottom: 84px; }
+#handout { display: none; }
+@page { size: A4; margin: 14mm 12mm; }
+@media print {
+  :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+    --bg: #fff; --surface: #fff; --surface-2: #e9eeec; --ink: #1b2a2f; --ink-2: #4a5b60; --muted: #7a8a8e; --line: #d3dcda;
+    --accent: #1f6f78; --accent-soft: #d6ebec; --ok: #2e7d4f; --warn: #8a6a12; --bad: #b5532f; --warn-soft: #f7ecd8; --bad-soft: #f6e1d8; color-scheme: light;
+  }
+  body { background: #fff; color: #000; }
+  .wrap > *:not(#handout), .printbar, .toast { display: none !important; }
+  body.has-bar .wrap { padding: 0; }
+  #handout { display: block; font-size: 14px; }
+  #handout h1 { font-size: 22px; margin-bottom: 4px; }
+  #handout .sum { border: 1px solid #999; border-radius: 6px; padding: 8px 12px; margin-top: 8px; font-size: 13px; }
+  #handout .sum ul { margin: 2px 0 0; padding-left: 1.3em; }
+  #handout .hx { display: grid; grid-template-columns: 1fr 96mm; gap: 12px; align-items: start; border: 1px solid #999; border-radius: 6px; padding: 8px 12px; margin-top: 8px; break-inside: avoid; }
+  #handout .hx b { font-size: 17px; }
+  #handout .dz { font-weight: 700; margin: 2px 0; }
+  #handout .chk { margin-top: 6px; font-size: 13px; }
+  #handout .figw { max-width: none; margin: 0; }
+  #handout .contact { border: 2px solid #1f6f78; border-radius: 6px; padding: 8px 12px; margin-top: 10px; break-inside: avoid; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>からだセルフチェック</h1>
+    <p>痛みと姿勢から、からだの使い方の「傾向」を確認し、あなたに合った自主練習メニューを作ります。写真はこの端末の中だけで処理し、外部には送信しません。</p>
+  </header>
+
+  <section class="card">
+    <h2><span class="no">1</span>どちらに当てはまりますか？</h2>
+    <div class="modes">
+      <button class="mode" type="button" data-mode="senior" aria-pressed="false"><b>シニア</b><span>転倒が心配・膝や腰が痛い・歩くのが不安</span></button>
+      <button class="mode" type="button" data-mode="worker" aria-pressed="false"><b>働く世代</b><span>腰痛・肩こり・首こり・座りっぱなし</span></button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <input type="text" id="pname" placeholder="お名前（任意・印刷に入ります）" autocomplete="off" style="flex:1;min-width:180px">
+      <input type="date" id="edate">
+    </div>
+  </section>
+
+  <section class="card" id="secRF">
+    <h2><span class="no">2</span>安全チェック（必ず回答）</h2>
+    <p class="hint" style="margin:0 0 8px">運動を始める前に、医療機関の受診が必要なサインがないか確認します。今の状態について、すべての質問に答えてください。</p>
+    <div id="rfList"></div>
+    <div class="rfbox" id="rfResult" role="status" aria-live="polite"></div>
+    <div class="row" style="margin-top:8px"><button class="btn" id="rfReset" type="button">回答をやり直す</button></div>
+  </section>
+
+  <section class="card" id="secPain">
+    <h2><span class="no">3</span>痛みや気になるところ</h2>
+    <div class="sub">どこが痛みますか？（いくつでも・なければ選ばずに次へ）</div>
+    <div class="chips" id="regions"></div>
+    <div id="painDetail" hidden>
+      <div class="sub">いちばん強いときの痛みは？（0＝痛みなし、10＝想像できる最悪の痛み）</div>
+      <div class="nrs"><span class="hint">0</span><input type="range" id="nrs" min="0" max="10" step="1" value="3" aria-label="痛みの強さ"><span class="hint">10</span><output id="nrsOut">3</output></div>
+      <div class="sub">どんなときに痛みますか？（いくつでも）</div>
+      <div class="chips" id="triggers"></div>
+    </div>
+    <div id="lifeBox"></div>
+  </section>
+
+  <section class="card" id="secPhoto">
+    <h2><span class="no">4</span>姿勢の写真（任意・おすすめ）</h2>
+    <p class="hint" style="margin:0">ふだん通りに楽に立った姿勢を、<b>全身（頭から足先まで）</b>が入るように撮影します。カメラは腰の高さで、2〜3m離れて。体の線が分かる服が理想です。写真は外部に送信されません。</p>
+    <div class="photos" style="margin-top:12px">
+      <div class="photo" id="phSide">
+        <h3>横から（右か左を向いて）</h3>
+        <div class="row" style="margin-top:6px">
+          <label class="btn primary">📷 撮影<input type="file" accept="image/*" capture="environment" data-view="side"></label>
+          <label class="btn">🖼 選ぶ<input type="file" accept="image/*" data-view="side"></label>
+        </div>
+        <canvas hidden></canvas>
+        <div class="st"></div>
+        <table class="m" hidden></table>
+      </div>
+      <div class="photo" id="phFront">
+        <h3>正面から</h3>
+        <div class="row" style="margin-top:6px">
+          <label class="btn primary">📷 撮影<input type="file" accept="image/*" capture="environment" data-view="front"></label>
+          <label class="btn">🖼 選ぶ<input type="file" accept="image/*" data-view="front"></label>
+        </div>
+        <canvas hidden></canvas>
+        <div class="st"></div>
+        <table class="m" hidden></table>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="row"><button class="btn primary" id="go" type="button" style="font-size:17px;padding:12px 20px">結果と練習メニューを見る</button><span class="hint" id="goHint"></span></div>
+  </section>
+
+  <section class="card" id="secResult" hidden>
+    <h2><span class="no">5</span>結果と自主練習メニュー</h2>
+    <div id="result"></div>
+    <details class="more" id="more"><summary>ほかの練習を追加する</summary><div id="moreList"></div></details>
+    <div id="ctaBox"></div>
+    <details class="more"><summary>記録用テキスト（コピーして保存・共有）</summary>
+      <div class="row" style="margin-top:8px"><button class="btn" id="copy" type="button">コピー</button></div>
+      <textarea class="out" id="record" readonly aria-label="記録用テキスト"></textarea>
+    </details>
+    <p class="note">※ このチェックは病気を診断するものではありません。写真の値は単眼カメラ画像からの2次元推定値（参考値）で、撮影角度や服装で変わります。痛みが続く・強くなる場合は医療機関に相談してください。</p>
+  </section>
+
+  <div id="handout"></div>
+</div>
+<div class="printbar" id="printbar" hidden>
+  <span class="cnt" id="pickCnt"></span>
+  <button class="btn primary" id="print" type="button">🖨 練習メニューを印刷</button>
+</div>
+
+<script type="module">
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const toast = msg => { const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.append(t); setTimeout(() => t.remove(), 2600); };
+
+// 相談・予約の窓口（訪問ストレッチなど）。url を入れると結果画面と印刷に表示される
+const CONTACT = {
+  title: "専門家にからだを見てもらいませんか？",
+  text: "理学療法士などの専門家が、ご自宅でからだの状態を確認し、ストレッチや運動を一緒に行います。",
+  label: "相談・予約はこちら",
+  url: "",
+};
+
+const VISION_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task";
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const withTimeout = (p, ms, msg) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(msg)), ms))]);
+
+const EX = {
+  iliopsoasStretch: { name: "股関節前面（腸腰筋）のストレッチ", how: "片膝立ちになり、骨盤を後ろに倒したまま体をゆっくり前へ移す。後ろ脚の付け根の前側が伸びる位置で止める。", dose: "30秒×3回／左右", caution: "腰を反らさない。ふらつく場合は台につかまる。" },
+  bridge: { name: "ブリッジ（お尻上げ）", how: "仰向けで膝を立て、お尻を持ち上げて肩〜膝が一直線になったら2秒止め、ゆっくり下ろす。", dose: "10回×2セット", caution: "腰を反りすぎない。" },
+  standHipExt: { name: "立って脚を後ろへ引く運動", how: "台につかまって立ち、膝を伸ばしたまま片脚をゆっくり後ろへ引いて戻す。上体は起こしたまま。", dose: "10回×2セット／左右", caution: "上体を前に倒して代償しない。" },
+  rfStretch: { name: "太もも前面（大腿直筋）のストレッチ", how: "横向きに寝て、上の脚の足首を持ち、かかとをお尻へ近づける。", dose: "30秒×3回／左右", caution: "腰を反らさない。膝に痛みが出る場合は中止。" },
+  seatedKneeFlex: { name: "座って膝を大きく曲げ伸ばし", how: "椅子に座り、足裏を床に滑らせて膝を深く曲げ、伸ばす。テンポよく繰り返す。", dose: "15回×2セット／左右" },
+  marching: { name: "もも上げ", how: "台につかまって立ち、膝を前へ高く引き上げて下ろす。左右交互に。", dose: "20回×2セット", caution: "支持物のそばで行う。" },
+  quadSet: { name: "膝裏でタオルを押す運動（大腿四頭筋）", how: "脚を伸ばして座り、膝裏に丸めたタオルを置く。膝裏でタオルを押しつぶすように太ももに力を入れ5秒保つ。", dose: "10回×2セット／左右" },
+  sitToStand: { name: "椅子からの立ち座り", how: "腕を胸の前で組み、椅子から立ち上がってゆっくり座る。", dose: "10回×2セット", caution: "膝が内側に入らないように。難しければ手すりを使用。" },
+  hamStretch: { name: "太もも裏（ハムストリングス）のストレッチ", how: "椅子に浅く座って片脚を前に伸ばし、背筋を伸ばしたまま上体を前へ倒す。", dose: "30秒×3回／左右" },
+  calfStretch: { name: "ふくらはぎのストレッチ", how: "壁に手をつき、後ろ脚の膝を伸ばしてかかとを床につけたまま体重を前へ移す。", dose: "30秒×3回／左右" },
+  toeRaise: { name: "つま先上げ（すねの筋肉）", how: "座ってかかとを床につけたまま、つま先をできるだけ高く持ち上げて下ろす。", dose: "20回×2セット" },
+  heelStrikeWalk: { name: "かかとから着く歩行練習", how: "「かかと→つま先」を意識して、ゆっくり大きめの歩幅で歩く。", dose: "10m×5往復", caution: "つまずきに注意し、見守り下で開始。" },
+  trunkExt: { name: "胸を張る体幹の伸展運動", how: "椅子に座り両手を頭の後ろで組み、胸を張って背中を伸ばし3秒止める。", dose: "10回×2セット" },
+  metronome: { name: "リズムに合わせた歩行", how: "メトロノーム（スマホアプリ可）の音に合わせて歩く。今の歩調より5〜10%速いテンポから始める。", dose: "2〜3分×3回", caution: "速さより左右均等なリズムを優先。" },
+  weightShift: { name: "左右への体重移動", how: "台の前で肩幅に立ち、左右へゆっくり体重を移して片側に3秒ずつ乗る。弱い側へしっかり乗る。", dose: "10往復×2セット" },
+  stepPractice: { name: "前後へのステップ練習", how: "片脚を一歩前に出して体重を乗せ、元に戻る。弱い側の脚での支持を意識する。", dose: "10回×2セット／左右", caution: "支持物のそばで行う。" },
+  strideWalk: { name: "歩幅を広げる歩行練習", how: "床に目印（テープなど）を貼り、それに合わせていつもより大きな歩幅で歩く。", dose: "10m×5往復" },
+  clamshell: { name: "クラムシェル（お尻の横の筋肉）", how: "横向きに寝て膝を曲げ、かかとをつけたまま上の膝を開いて閉じる。", dose: "15回×2セット／左右", caution: "骨盤が後ろへ倒れないように。" },
+  sideLegRaise: { name: "横向きで脚を上げる運動（中殿筋）", how: "横向きに寝て下の脚は軽く曲げ、上の脚を膝を伸ばしたままやや後ろ斜め上へ持ち上げる。", dose: "10回×2セット／左右", caution: "体を後ろに倒さない。" },
+  singleLeg: { name: "片脚立ち（支持あり）", how: "台につかまり片脚で立つ。骨盤を水平に、上体をまっすぐに保つ。", dose: "10〜30秒×3回／左右", caution: "転倒に注意し、必ず支持物のそばで。" },
+  sideStep: { name: "横歩き", how: "台やキッチンに沿って、つま先を前に向けたまま横へ歩く。", dose: "5m×3往復" },
+  heelRaise: { name: "かかと上げ", how: "台につかまって立ち、つま先立ちになってゆっくり下ろす。", dose: "15回×2セット" },
+};
+
+// このアプリで追加した練習（首・肩・腰まわり）
+Object.assign(EX, {
+  chinTuck: { name: "あご引き運動", how: "背筋を伸ばして座り、目線は正面のまま、あごを水平に後ろへ引いて二重あごを作る。首の後ろが伸びる位置で止める。", dose: "5秒×10回" },
+  pecStretch: { name: "胸のストレッチ（壁）", how: "壁の横に立ち、肩の高さで手のひらを壁につける。腕はそのままで、体を前へ出して胸の前を伸ばす。", dose: "30秒×2回／左右", caution: "肩に痛みが出る場合は手の位置を下げる。" },
+  scapSqueeze: { name: "肩甲骨寄せ", how: "椅子に座って肘を曲げ、胸を張りながら肘を後ろへ引き、左右の肩甲骨を寄せて止める。", dose: "5秒×10回", caution: "肩をすくめない。" },
+  upperTrapStretch: { name: "首の横のストレッチ", how: "背筋を伸ばし、頭を横に倒す。倒した側の手を頭に軽く添え、反対側の首から肩が伸びる位置で止める。", dose: "30秒×2回／左右", caution: "手で強く引っ張らない。しびれが出たら中止。" },
+  pelvicTilt: { name: "腰を床に押しつける運動", how: "仰向けで膝を立て、お腹に力を入れて、腰と床のすき間をつぶすように腰を床へ押しつける。", dose: "5秒×10回", caution: "息を止めない。ベッドの上でも可。" },
+  drawIn: { name: "ドローイン（お腹をへこませる呼吸）", how: "仰向けで膝を立て、鼻から息を吸い、口から吐きながらお腹をゆっくりへこませて保つ。", dose: "10秒×10回", caution: "ベッドの上や座ったままでも可。" },
+  kneeExt: { name: "座って膝を伸ばす運動", how: "椅子に深く座り、片方の膝をまっすぐ伸ばしてつま先を天井へ向け、3秒止めてゆっくり下ろす。", dose: "10回×2セット／左右" },
+  sideBend: { name: "体の横のストレッチ", how: "足を肩幅に開いて立ち、片腕を上げて、反対側へ体をゆっくり倒す。わき腹が伸びる位置で止める。", dose: "30秒×2回／左右", caution: "ふらつく場合は座って行う。" },
+});
+
+// ---------- 練習の棒人間イラスト ----------
+// 1枚 100×84 の座標。床は y=80。人は右向き。角度は「真下=0°、前（右）へ倒すと＋」。
+// 脚・腕は [付け根側の角度, 先端側の角度]、{to:[x,y]}（先端の位置から関節を計算）、{k:[膝],a:[足首]}（位置を直接指定）で指定する。
+const FG = 80, D = Math.PI / 180;
+const ARM_N = [8, 18], ARM_F = [-6, 8];
+const FIG = {
+  iliopsoasStretch: { hl: ["thighN"], cap: ["片膝立ちになる", "体を前へ移す（30秒）"], arrow: { j: "hip", off: [0, -6], bend: -0.5 },
+    p: [{ hip: [42, 62], ln: [-10, -90], fn: 180, lf: [90, 0], an: { to: [55, 57], bend: -1 }, af: { to: [55, 57], bend: -1 } },
+        { hip: [49, 64], ln: [-34, -90], fn: 180, lf: { to: [59, 79] }, an: { to: [60, 60], bend: -1 }, af: { to: [60, 60], bend: -1 } }] },
+  bridge: { hl: ["dot:hip"], props: [{ c: "mat" }], cap: ["仰向けで膝を立てる", "お尻を上げて2秒止める"], arrow: { j: "hip", off: [-7, 0], bend: 0.4 },
+    p: [{ hip: [52, 75], t: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [39, 78], a: [50, 78.5] }, af: { k: [39, 78], a: [50, 78.5] } },
+        { hip: [52, 62], t: -121, hd: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [42, 78], a: [52, 78.5] }, af: { k: [42, 78], a: [52, 78.5] } }] },
+  standHipExt: { hl: ["thighN"], props: [{ c: "table", x: 62, y: 37 }], cap: ["台につかまって立つ", "脚を後ろへ引く"], arrow: { j: "ankN", off: [0, -4], bend: 0.4 },
+    p: [{ hip: [44, 45], an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } },
+        { hip: [44, 45], ln: [-30, -30], an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } }] },
+  rfStretch: { hl: ["thighN"], props: [{ c: "mat" }], cap: ["横向きに寝る", "足首を持ち かかとをお尻へ（30秒）"], arrow: { j: "ankN", off: [0, -5], bend: -0.5 },
+    p: [{ hip: [52, 75], t: -90, ln: [90, 90], lf: [90, 90], an: { k: [38, 78], a: [48, 78.5] }, af: { k: [38, 78], a: [48, 78.5] } },
+        { hip: [52, 75], t: -90, ln: [115, -80], lf: [90, 90], an: { to: [50.7, 70.7] }, af: { k: [38, 78], a: [48, 78.5] } }] },
+  seatedKneeFlex: { hl: ["dot:kneeN"], props: [{ c: "chair", x: 40 }], cap: ["椅子に座る", "足を後ろへ引いて膝を深く曲げる → 伸ばす"], arrow: { j: "ankN", off: [0, -5], bend: 0.4 },
+    p: [{ hip: [40, 62], ln: { to: [64, 79] }, lf: [90, 0], an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } },
+        { hip: [40, 62], ln: { to: [47, 79] }, lf: [90, 0], an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } }] },
+  marching: { hl: ["thighN"], props: [{ c: "table", x: 62, y: 37 }], cap: ["台につかまって立つ", "膝を高く上げる（左右交互）"], arrow: { j: "kneeN", off: [0, -4], bend: -0.4 },
+    p: [{ hip: [44, 45], an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } },
+        { hip: [44, 45], ln: [70, 0], an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } }] },
+  quadSet: { hl: ["thighN"], props: [{ c: "towel", x: 52, y: 78 }], cap: ["脚を伸ばして座り 膝の下にタオル", "膝裏でタオルを押す（5秒）"], arrow: { from: [52, 60], to: [52, 71] },
+    p: [{ hip: [35, 76], t: -15, ln: [90, 90], lf: [90, 90], an: { to: [24, 77], bend: -1 }, af: { to: [24, 77], bend: -1 } },
+        { hip: [35, 76], t: -15, ln: [90, 90], lf: [90, 90], an: { to: [24, 77], bend: -1 }, af: { to: [24, 77], bend: -1 } }] },
+  sitToStand: { hl: ["thighN"], props: [{ c: "chair", x: 40 }], cap: ["腕を組んで座る", "立ち上がる → ゆっくり座る"], arrow: { j: "hip", off: [-6, -2], bend: 0.4 },
+    p: [{ hip: [40, 62], t: 12, ln: { to: [55, 79] }, lf: { to: [55, 79] }, an: [30, 150], af: [30, 150] },
+        { hip: [50, 46], ln: { to: [55, 79] }, lf: { to: [55, 79] }, an: [30, 150], af: [30, 150] }] },
+  hamStretch: { hl: ["thighN"], props: [{ c: "chair", x: 36 }], cap: ["浅く座り 片脚を前に伸ばす", "背筋を伸ばして上体を前へ（30秒）"], arrow: { j: "sh", off: [0, -7], bend: -0.4 },
+    p: [{ hip: [36, 62], ln: { to: [68, 77] }, fn: 70, lf: [90, 0], an: { to: [50, 60], bend: -1 }, af: { to: [50, 60], bend: -1 } },
+        { hip: [36, 62], t: 40, ln: { to: [68, 77] }, fn: 70, lf: [90, 0], an: { to: [62, 66], bend: -1 }, af: { to: [62, 66], bend: -1 } }] },
+  calfStretch: { hl: ["shankN"], props: [{ c: "wall", x: 71 }], cap: ["壁に手をつき 脚を前後に開く", "かかとをつけたまま体重を前へ（30秒）"], arrow: { j: "hip", off: [0, -6], bend: -0.4 },
+    p: [{ hip: [45, 46.5], t: 5, ln: { to: [35, 79] }, fn: 0, lf: { to: [56, 79] }, an: { to: [69, 27], bend: -1 }, af: { to: [69, 27], bend: -1 } },
+        { hip: [50, 48.5], t: 12, ln: { to: [35, 79] }, fn: 0, lf: { to: [57, 79] }, an: { to: [70, 27], bend: -1 }, af: { to: [70, 27], bend: -1 } }] },
+  toeRaise: { hl: ["shankN"], props: [{ c: "chair", x: 40 }], cap: ["椅子に座る", "かかとはつけたまま つま先を上げる"], arrow: { j: "toeN", off: [3, -3], bend: -0.5 },
+    p: [{ hip: [40, 62], ln: [90, 0], lf: [90, 0], an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } },
+        { hip: [40, 62], ln: [90, 0], lf: [90, 0], fn: 30, an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } }] },
+  heelStrikeWalk: { hl: ["dot:heelN"], cap: ["かかとから着く", "足裏全体に体重を乗せる"], arrow: { j: "hip", off: [0, -6], bend: -0.3 },
+    p: [{ hip: [45, 46], t: 3, ln: { to: [58, 78] }, fn: 25, lf: { to: [34, 77] }, ff: -35, an: [-25, -15], af: [25, 40] },
+        { hip: [56, 45], t: 3, ln: { to: [58, 79] }, lf: [25, -10], an: [15, 30], af: [-20, -10] }] },
+  trunkExt: { hl: ["trunk"], props: [{ c: "chair", x: 40 }], cap: ["手を頭の後ろで組む", "胸を張って背中を伸ばす（3秒）"], arrow: { j: "sh", off: [5, -3], bend: -0.5 },
+    p: [{ hip: [40, 62], t: 15, ln: [90, 0], lf: [90, 0], an: { k: [58, 28], a: [43, 31.5] }, af: { k: [58, 28], a: [43, 31.5] } },
+        { hip: [40, 62], t: -8, ln: [90, 0], lf: [90, 0], an: { k: [45.5, 27.5], a: [30.5, 30.8] }, af: { k: [45.5, 27.5], a: [30.5, 30.8] } }] },
+  metronome: { props: [{ c: "note", x: 84, y: 14 }], cap: ["メトロノームを鳴らす", "音に合わせて歩く"], arrow: { j: "hip", off: [0, -6], bend: -0.3 },
+    p: [{ hip: [42, 45], t: 3, ln: { to: [54, 78] }, fn: 15, lf: { to: [31, 77] }, ff: -25, an: [-20, -10], af: [20, 35] },
+        { hip: [56, 45], t: 3, lf: { to: [68, 78] }, ff: 15, ln: { to: [45, 77] }, fn: -25, an: [20, 35], af: [-20, -10] }] },
+  weightShift: { hl: ["thighN", "shankN"], cap: ["肩幅に立つ（正面から見た図）", "横へ体重を移して3秒"], arrow: { j: "hip", off: [0, -5], bend: -0.4 },
+    p: [{ front: 1, hip: [50, 45], ln: { to: [57, 79] }, lf: { to: [43, 79], bend: -1 } },
+        { front: 1, hip: [56, 45.5], t: 4, ln: { to: [57, 79] }, lf: { to: [43, 79], bend: -1 } }] },
+  stepPractice: { hl: ["thighN"], cap: ["まっすぐ立つ", "一歩前へ出て体重を乗せる → 戻る"], arrow: { j: "ankN", off: [0, -5], bend: -0.4 },
+    p: [{ hip: [40, 45] },
+        { hip: [50, 49], ln: { to: [62, 79] }, lf: { to: [40, 77] }, ff: -20, an: [-10, 5], af: [15, 30] }] },
+  strideWalk: { props: [{ c: "tape", xs: [31, 56, 81] }], cap: ["床に目印を貼る", "目印に合わせて大股で歩く"], arrow: { j: "hip", off: [0, -6], bend: -0.3 },
+    p: [{ hip: [44, 46], t: 3, ln: { to: [56, 78] }, fn: 15, lf: { to: [31, 77] }, ff: -25, an: [-20, -10], af: [20, 35] },
+        { hip: [69, 46], t: 3, ln: { to: [56, 77] }, fn: -25, lf: { to: [81, 78] }, ff: 15, an: [20, 35], af: [-20, -10] }] },
+  clamshell: { hl: ["dot:hip"], props: [{ c: "mat" }], cap: ["横向きに寝て膝を曲げる", "かかとをつけたまま上の膝を開く"], arrow: { j: "kneeN", off: [5, 0], bend: -0.5 },
+    p: [{ hip: [48, 74], t: -90, nofeet: 1, lf: { k: [64, 78], a: [50, 79] }, ln: { k: [64, 75.5], a: [50, 77] }, an: { k: [34, 77.5], a: [44, 78] }, af: { k: [34, 77.5], a: [44, 78] } },
+        { hip: [48, 74], t: -90, nofeet: 1, lf: { k: [64, 78], a: [50, 79] }, ln: { k: [59, 59], a: [50, 77] }, an: { k: [34, 77.5], a: [44, 78] }, af: { k: [34, 77.5], a: [44, 78] } }] },
+  sideLegRaise: { hl: ["dot:hip"], props: [{ c: "mat" }], cap: ["横向きに寝る（下の脚は軽く曲げる）", "上の脚を伸ばしたまま上げる"], arrow: { j: "ankN", off: [4, 0], bend: -0.5 },
+    p: [{ hip: [46, 74], t: -90, nofeet: 1, lf: { k: [60, 78], a: [74, 79] }, ln: [90, 90], an: { k: [32, 77.5], a: [42, 78] }, af: { k: [32, 77.5], a: [42, 78] } },
+        { hip: [46, 74], t: -90, nofeet: 1, lf: { k: [60, 78], a: [74, 79] }, ln: [112, 112], an: { k: [32, 77.5], a: [42, 78] }, af: { k: [32, 77.5], a: [42, 78] } }] },
+  singleLeg: { hl: ["thighF", "shankF"], props: [{ c: "table", x: 12, y: 43, w: 22 }], cap: ["台につかまって立つ（正面から見た図）", "片脚で立つ（10〜30秒）"], arrow: { j: "kneeN", off: [5, 0], bend: -0.5 },
+    p: [{ front: 1, hip: [50, 45], ln: { to: [55, 79] }, lf: { to: [45, 79], bend: -1 }, af: { to: [34, 43], bend: -1 } },
+        { front: 1, hip: [49, 45], ln: { k: [56, 59], a: [55, 71] }, lf: { to: [45, 79], bend: -1 }, af: { to: [34, 43], bend: -1 } }] },
+  sideStep: { cap: ["台に沿って立つ（正面から見た図）", "横へ一歩ずつ歩く"], arrow: { j: "ankN", off: [0, -5], bend: -0.4 },
+    p: [{ front: 1, hip: [44, 45], ln: { to: [48, 79] }, lf: { to: [40, 79], bend: -1 } },
+        { front: 1, hip: [52, 46], ln: { to: [64, 79] }, lf: { to: [40, 79], bend: -1 } }] },
+  heelRaise: { hl: ["shankN"], props: [{ c: "table", x: 62, y: 37 }], cap: ["台につかまって立つ", "かかとを上げ ゆっくり下ろす"], arrow: { j: "hip", off: [-7, 0], bend: 0.4 },
+    p: [{ hip: [44, 45], an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } },
+        { hip: [44, 40], fn: -40, ff: -40, an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } }] },
+};
+
+const add = (a, b, k = 1) => [a[0] + b[0] * k, a[1] + b[1] * k];
+const dirV = a => [Math.sin(a * D), Math.cos(a * D)]; // 手足：真下=0°
+function ik(a, b, l1, l2, s = 1) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), u = [dx / L, dy / L];
+  if (L >= l1 + l2 - 0.01) return [add(a, u, l1), add(a, u, l1 + l2)];
+  const x = (l1 * l1 - l2 * l2 + L * L) / (2 * L), h = Math.sqrt(Math.max(0, l1 * l1 - x * x));
+  return [add(add(a, u, x), [u[1] * s, -u[0] * s], h), b];
+}
+function limb(spec, root, l1, l2) {
+  if (Array.isArray(spec)) { const m = add(root, dirV(spec[0]), l1); return [m, add(m, dirV(spec[1]), l2)]; }
+  if (spec.k) return [spec.k, spec.a];
+  return ik(root, spec.to, l1, l2, spec.bend ?? 1);
+}
+function solvePose(p) {
+  const t = (p.t || 0) * D, tv = [Math.sin(t), -Math.cos(t)];
+  const hip = p.hip, sh = add(hip, tv, 24);
+  const hv = p.hd != null ? [Math.sin(p.hd * D), -Math.cos(p.hd * D)] : tv;
+  const J = { hip, sh, head: add(sh, hv, 8.5), front: !!p.front, nofeet: !!p.nofeet };
+  const w = p.front ? 1 : 0;
+  J.hipN = add(hip, [4.5 * w, 0]); J.hipF = add(hip, [-4.5 * w, 0]);
+  J.shN = add(sh, [7 * w, 0]); J.shF = add(sh, [-7 * w, 0]);
+  [J.kneeN, J.ankN] = limb(p.ln || (p.front ? { to: [hip[0] + 6, 79] } : [0, 0]), J.hipN, 17, 17);
+  [J.kneeF, J.ankF] = limb(p.lf || (p.front ? { to: [hip[0] - 6, 79], bend: -1 } : [0, 0]), J.hipF, 17, 17);
+  [J.elbN, J.handN] = limb(p.an || (p.front ? [12, 6] : ARM_N), J.shN, 12, 11);
+  [J.elbF, J.handF] = limb(p.af || (p.front ? [-12, -6] : ARM_F), J.shF, 12, 11);
+  for (const s of ["N", "F"]) {
+    const knee = J["knee" + s], ank = J["ank" + s], fa = p["f" + s.toLowerCase()];
+    let fd;
+    if (p.front) fd = [s === "N" ? 1 : -1, 0];
+    else if (fa != null) fd = [Math.cos(fa * D), -Math.sin(fa * D)];
+    else { const L = Math.hypot(ank[0] - knee[0], ank[1] - knee[1]); fd = [(ank[1] - knee[1]) / L, -(ank[0] - knee[0]) / L]; }
+    J["heel" + s] = add(ank, fd, p.front ? -0.5 : -2); J["toe" + s] = add(ank, fd, p.front ? 3.5 : 7);
+  }
+  return J;
+}
+const pt = q => q[0].toFixed(1) + "," + q[1].toFixed(1);
+const pl = (pts, cls) => `<polyline class="${cls}" points="${pts.map(pt).join(" ")}"/>`;
+function drawProps(props) {
+  let g = "";
+  for (const o of props || []) {
+    if (o.c === "chair") g += `<path class="pr" d="M${o.x - 9} ${FG}V64H${o.x + 8}V${FG}M${o.x - 9} 64V40"/>`;
+    if (o.c === "table") { const w = o.w || 20; g += `<path class="pr" d="M${o.x} ${o.y}h${w}M${o.x + 2} ${o.y}V${FG}M${o.x + w - 2} ${o.y}V${FG}"/>`; }
+    if (o.c === "wall") { const s = o.side === "l" ? -1 : 1; g += `<path class="pr" d="M${o.x} 2V${FG + 1}"/><path class="hatch" d="${Array.from({ length: 9 }, (_, i) => `M${o.x} ${10 + i * 8}l${4 * s} -4`).join("")}"/>`; }
+    if (o.c === "mat") g += `<rect class="mat" x="8" y="${FG - 0.5}" width="86" height="2.6" rx="1"/>`;
+    if (o.c === "towel") g += `<ellipse class="towel" cx="${o.x}" cy="${o.y}" rx="5" ry="2.2"/>`;
+    if (o.c === "tape") g += o.xs.map(x => `<rect class="tape" x="${x - 3}" y="${FG - 0.8}" width="6" height="2"/>`).join("");
+    if (o.c === "note") g += `<path class="pr" d="M${o.x - 5} ${o.y + 10}L${o.x - 2} ${o.y - 4}H${o.x + 2}L${o.x + 5} ${o.y + 10}ZM${o.x} ${o.y + 7}L${o.x + 4} ${o.y - 1}"/><text class="nt" x="${o.x - 18}" y="${o.y + 4}">♪</text>`;
+  }
+  return g;
+}
+// 人型ピクトグラム：太い線で手足・胴体を描き、奥側の手足は薄い灰色、手前の手足は縁取りして重なりを見分けやすくする
+function drawFig(J, hl, ghost) {
+  const legPts = s => [J["hip" + s], J["knee" + s], J["ank" + s]];
+  const footPts = s => J.nofeet ? null : [J["heel" + s], J["toe" + s]];
+  const armPts = s => [J["sh" + s], J["elb" + s], J["hand" + s]];
+  const headC = `cx="${J.head[0].toFixed(1)}" cy="${J.head[1].toFixed(1)}"`;
+  if (ghost) {
+    const ls = [legPts("F"), footPts("F"), armPts("F"), legPts("N"), footPts("N"), armPts("N"), [J.hip, J.sh]].filter(Boolean);
+    return `<g class="gh">${ls.map(q => pl(q, "")).join("")}<circle ${headC} r="6"/></g>`;
+  }
+  const seg = { thighN: ["hipN", "kneeN"], shankN: ["kneeN", "ankN"], thighF: ["hipF", "kneeF"], shankF: ["kneeF", "ankF"], trunk: ["hip", "sh"], upperN: ["shN", "elbN"], upperF: ["shF", "elbF"] };
+  const hls = (hl || []).filter(h => !h.startsWith("dot:"));
+  const hlOf = side => hls.filter(h => side ? h.endsWith(side) : h === "trunk").map(h => pl(seg[h].map(k => J[k]), "hl"));
+  const torso = J.front ? pl([J.shF, J.shN], "tr") + pl([J.hipF, J.hipN], "tr") + pl([J.hip, J.sh], "tr") : pl([J.hip, J.sh], "tr");
+  const near = [legPts("N"), footPts("N"), armPts("N")].filter(Boolean);
+  let g = `<g class="far">${[legPts("F"), footPts("F"), armPts("F")].filter(Boolean).map(q => pl(q, "")).join("")}${hlOf("F").join("")}</g>`;
+  g += `<g class="near">${torso}${hlOf("").join("")}<circle class="hd" ${headC} r="6"/>${near.map(q => pl(q, "halo")).join("")}${near.map(q => pl(q, "")).join("")}${hlOf("N").join("")}</g>`;
+  for (const h of hl || []) if (h.startsWith("dot:")) { const q = J[h.slice(4)]; g += `<circle class="hld" cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="5"/>`; }
+  return g;
+}
+function drawArrow(a, A, B) {
+  const p0 = a.from || add(A[a.j], a.off || [0, 0]), p2 = a.to || add(B[a.j], a.off || [0, 0]);
+  const dx = p2[0] - p0[0], dy = p2[1] - p0[1], b = a.bend || 0;
+  const c = [(p0[0] + p2[0]) / 2 - dy * b, (p0[1] + p2[1]) / 2 + dx * b];
+  const ux = p2[0] - c[0], uy = p2[1] - c[1], ul = Math.hypot(ux, uy) || 1, h = 4.5, wv = 3;
+  const bx = p2[0] - ux / ul * h, by = p2[1] - uy / ul * h;
+  return `<path class="ar" d="M${pt(p0)}Q${pt(c)} ${bx.toFixed(1)},${by.toFixed(1)}"/><path class="arh" d="M${pt(p2)}L${(bx - uy / ul * wv).toFixed(1)},${(by + ux / ul * wv).toFixed(1)}L${(bx + uy / ul * wv).toFixed(1)},${(by - ux / ul * wv).toFixed(1)}Z"/>`;
+}
+// 人と道具がちょうど収まる表示範囲（2コマ共通）。細長くなりすぎないよう縦横比を整える
+function figBox(f, A, B) {
+  const xs = [], ys = [];
+  for (const J of [A, B]) for (const v of Object.values(J)) if (Array.isArray(v)) { xs.push(v[0]); ys.push(v[1]); }
+  for (const J of [A, B]) { xs.push(J.head[0] - 7, J.head[0] + 7); ys.push(J.head[1] - 7); }
+  for (const o of f.props || []) {
+    if (o.c === "chair") { xs.push(o.x - 10, o.x + 9); ys.push(40); }
+    if (o.c === "table") { xs.push(o.x, o.x + (o.w || 20)); ys.push(o.y); }
+    if (o.c === "wall") { xs.push(o.x + (o.side === "l" ? -5 : 5)); ys.push(Math.min(...ys)); }
+    if (o.c === "mat") xs.push(10, 92);
+    if (o.c === "tape") xs.push(...o.xs.map(x => x - 4), ...o.xs.map(x => x + 4));
+    if (o.c === "note") { xs.push(o.x - 20, o.x + 6); ys.push(o.y - 5); }
+  }
+  let x0 = Math.min(...xs) - 6, x1 = Math.max(...xs) + 6, y0 = Math.min(...ys) - 5, y1 = FG + 5;
+  let w = x1 - x0, h = y1 - y0;
+  if (w / h < 1) { x0 -= (h - w) / 2; w = h; }
+  if (w / h > 1.8) { h = w / 1.8; y0 = y1 - h; }
+  return [x0, y0, w, h];
+}
+const FIG_TIP = {
+  iliopsoasStretch: "伸びる", rfStretch: "伸びる", hamStretch: "伸びる", calfStretch: "伸びる",
+  seatedKneeFlex: "（膝）をしっかり曲げる", heelStrikeWalk: "（かかと）から着く", trunkExt: "（背中）を伸ばす",
+  weightShift: "の脚に体重を乗せる", singleLeg: "の脚で支える", stepPractice: "の脚に体重を乗せる",
+};
+// 練習1つ分のイラスト（①はじめ → ②動かす）
+function figHTML(key) {
+  const f = FIG[key]; if (!f) return "";
+  const [A, B] = f.p.map(solvePose);
+  const [x0, y0, w, h] = figBox(f, A, B);
+  const vb = `${x0.toFixed(1)} ${y0.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`;
+  const floor = `<rect class="fl" x="${x0}" y="${FG + 1.3}" width="${w}" height="${y0 + h - FG}"/><line class="gr" x1="${x0}" y1="${FG + 1.3}" x2="${x0 + w}" y2="${FG + 1.3}"/>`;
+  const svg = (inner, label) => `<svg viewBox="${vb}" role="img" aria-label="${label}">${floor}${drawProps(f.props)}${inner}</svg>`;
+  const t = FIG_TIP[key];
+  const tipT = !(f.hl && f.hl.length) ? "" : !t ? "の所に力を入れる" : t.startsWith("伸") ? "の所が" + t : t.startsWith("の") ? t : "の所" + t;
+  return `<div class="figw">${tipT ? `<div class="tip"><i></i>オレンジ色${tipT}</div>` : ""}<div class="fig">
+    <figure>${svg(drawFig(A, f.hl), f.cap[0])}<figcaption><b>①</b> ${f.cap[0]}</figcaption></figure>
+    <span class="fa" aria-hidden="true">▶</span>
+    <figure>${svg(drawFig(A, null, true) + drawFig(B, f.hl) + (f.arrow ? drawArrow(f.arrow, A, B) : ""), f.cap[1])}<figcaption><b>②</b> ${f.cap[1]}</figcaption></figure>
+  </div></div>`;
+}
+
+
+Object.assign(FIG, {
+  chinTuck: { cap: ["あごが前に出た姿勢", "あごを水平に引いて首の後ろを伸ばす（5秒）"], props: [{ c: "chair", x: 40 }], arrow: { j: "head", off: [0, -9], bend: 0.3 },
+    p: [{ hip: [40, 62], t: 10, hd: 58, ln: [90, 0], lf: [90, 0], an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } },
+        { hip: [40, 62], t: 0, hd: -4, ln: [90, 0], lf: [90, 0], an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } }] },
+  pecStretch: { hl: ["upperN"], props: [{ c: "wall", x: 22, side: "l" }], cap: ["壁の横に立ち 手のひらを壁につける", "体を前へ出して胸の前を伸ばす（30秒）"], arrow: { j: "hip", off: [0, -6], bend: -0.4 },
+    p: [{ hip: [44, 45], an: { to: [24, 21] } },
+        { hip: [47, 45.5], t: 3, ln: { to: [56, 79] }, lf: { to: [43, 78] }, ff: -15, an: { to: [24, 21] } }] },
+  scapSqueeze: { hl: ["dot:sh"], props: [{ c: "chair", x: 40 }], cap: ["椅子に座り 肘を曲げる", "肘を後ろへ引いて肩甲骨を寄せる（5秒）"], arrow: { j: "elbN", off: [0, 4], bend: -0.4 },
+    p: [{ hip: [40, 62], ln: [90, 0], lf: [90, 0], an: [25, 90], af: [25, 90] },
+        { hip: [40, 62], t: -4, ln: [90, 0], lf: [90, 0], an: [-40, 90], af: [-40, 90] }] },
+  upperTrapStretch: { hl: ["dot:shF"], cap: ["まっすぐ立つ（正面から見た図）", "頭を横に倒し 手を軽く添える（30秒）"], arrow: { j: "head", off: [0, -8], bend: -0.4 },
+    p: [{ front: 1, hip: [50, 45] },
+        { front: 1, hip: [50, 45], hd: 26, an: { k: [66, 12], a: [57, 7] } }] },
+  pelvicTilt: { hl: ["trunk"], props: [{ c: "mat" }], cap: ["仰向けで膝を立てる", "お腹に力を入れ 腰を床に押しつける（5秒）"], arrow: { from: [42, 61], to: [42, 69] },
+    p: [{ hip: [52, 75], t: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [39, 78], a: [50, 78.5] }, af: { k: [39, 78], a: [50, 78.5] } },
+        { hip: [52, 75], t: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [39, 78], a: [50, 78.5] }, af: { k: [39, 78], a: [50, 78.5] } }] },
+  drawIn: { hl: ["trunk"], props: [{ c: "mat" }], cap: ["仰向けで膝を立て 鼻から息を吸う", "口から吐きながらお腹をへこませる（10秒）"], arrow: { from: [47, 62], to: [47, 70] },
+    p: [{ hip: [52, 75], t: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [39, 78], a: [50, 78.5] }, af: { k: [39, 78], a: [50, 78.5] } },
+        { hip: [52, 75], t: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [39, 78], a: [50, 78.5] }, af: { k: [39, 78], a: [50, 78.5] } }] },
+  kneeExt: { hl: ["thighN"], props: [{ c: "chair", x: 40 }], cap: ["椅子に深く座る", "膝をまっすぐ伸ばして3秒 → ゆっくり下ろす"], arrow: { j: "ankN", off: [4, 0], bend: -0.4 },
+    p: [{ hip: [40, 62], ln: [90, 0], lf: [90, 0], an: { to: [45, 63], bend: -1 }, af: { to: [45, 63], bend: -1 } },
+        { hip: [40, 62], ln: [90, 90], lf: [90, 0], an: { to: [45, 63], bend: -1 }, af: { to: [45, 63], bend: -1 } }] },
+  sideBend: { hl: ["trunk"], cap: ["まっすぐ立つ（正面から見た図）", "片腕を上げて体を横に倒す（30秒）"], arrow: { j: "handF", off: [0, -3], bend: -0.4 },
+    p: [{ front: 1, hip: [50, 45] },
+        { front: 1, hip: [50, 45], t: 14, af: [165, 130], an: [10, 5] }] },
+});
+Object.assign(FIG_TIP, { pecStretch: "伸びる", upperTrapStretch: "伸びる", sideBend: "伸びる", pelvicTilt: "（お腹）に力を入れる", drawIn: "（お腹）をへこませる" });
+
+const RF = [
+  { id: "stroke", lv: "em", q: "急に片側の手足が動かしにくい・しびれる、ろれつが回らない、顔の片側が下がっている" },
+  { id: "chest", lv: "em", q: "胸の痛みや締めつけ感、息苦しさがある" },
+  { id: "cauda", lv: "em", q: "尿や便が出にくい・もらしてしまう、お尻や股のまわりがしびれる" },
+  { id: "trauma", lv: "em", q: "転倒やケガのあとから、痛くて体重をかけられない・変形や強い腫れがある" },
+  { id: "sudden", lv: "em", q: "突然の激しい痛み（冷や汗・吐き気を伴う）や、これまでにない激しい頭痛がある" },
+  { id: "fever", lv: "dr", q: "痛みと一緒に発熱がある" },
+  { id: "night", lv: "dr", q: "安静にしていても、夜間も痛みが続く（姿勢を変えても楽にならない）" },
+  { id: "weight", lv: "dr", q: "理由の分からない体重減少がある（半年で数kg以上）" },
+  { id: "cancer", lv: "dr", q: "がんの治療を受けたことがある、または治療中である" },
+  { id: "neuro", lv: "dr", q: "手足のしびれや力の入りにくさが、だんだん強くなっている" },
+  { id: "myelo", lv: "dr", q: "箸・ボタンなど手の細かい動作がしにくくなり、歩くのも不安定になってきた" },
+  { id: "osteo", lv: "dr", q: "骨粗しょう症やステロイド薬の長期使用があり、軽い転倒・尻もちのあとから痛む" },
+  { id: "dvt", lv: "dr", q: "片方のふくらはぎ・脚が腫れていて、赤み・熱っぽさ・痛みがある" },
+  { id: "joint", lv: "dr", q: "関節が赤く腫れて、熱をもっている" },
+  { id: "worse", lv: "dr", q: "痛みが日に日に強くなっている、または今までに経験したことのない痛みがある" },
+];
+
+// ---------- 状態 ----------
+const S = { mode: null, rf: {}, rfOk: false, regions: new Set(), triggers: new Set(), nrs: 3, life: {}, posture: { side: null, front: null }, findings: [], picked: new Set(), landmarker: null, shown: false };
+const today = new Date(); $("edate").value = new Date(today.getTime() - today.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+
+// ---------- ① モード ----------
+document.querySelectorAll(".mode").forEach(b => b.addEventListener("click", () => {
+  S.mode = b.dataset.mode;
+  document.querySelectorAll(".mode").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  renderLife(); refresh();
+}));
+
+// ---------- ② 安全チェック ----------
+function safety() {
+  const yes = RF.filter(x => S.rf[x.id] === "y"), left = RF.filter(x => !S.rf[x.id]).length;
+  if (yes.some(x => x.lv === "em")) return { st: "em", yes, left };
+  if (left) return { st: "incomplete", yes, left };
+  if (yes.length) return { st: S.rfOk ? "drok" : "dr", yes, left };
+  return { st: "ok", yes, left };
+}
+const safeToExercise = () => ["ok", "drok"].includes(safety().st);
+function renderRFList() {
+  const grp = (lv, title) => `<div class="rfg ${lv}">${title}</div>` + RF.filter(x => x.lv === lv).map(x => `
+    <div class="rfq"><span>${x.q}</span><span class="yn" role="radiogroup" aria-label="${x.q}">
+      <label><input type="radio" class="y" name="rf_${x.id}" value="y"${S.rf[x.id] === "y" ? " checked" : ""}><span>はい</span></label>
+      <label><input type="radio" class="n" name="rf_${x.id}" value="n"${S.rf[x.id] === "n" ? " checked" : ""}><span>いいえ</span></label></span></div>`).join("");
+  $("rfList").innerHTML = grp("em", "すぐに受診が必要なサイン") + grp("dr", "運動の前に受診が必要なサイン");
+  // 新しく「はい」になったサインには、改めて医師の許可確認が要る
+  $("rfList").querySelectorAll("input").forEach(i => i.addEventListener("change", () => { S.rf[i.name.slice(3)] = i.value; if (i.value === "y") S.rfOk = false; updateRF(); }));
+  updateRF();
+}
+function updateRF() {
+  const sf = safety(), box = $("rfResult"), list = sf.yes.length ? `<ul>${sf.yes.map(x => `<li>${x.q}</li>`).join("")}</ul>` : "";
+  box.className = "rfbox " + ({ em: "em", dr: "dr", drok: "dr", ok: "ok" }[sf.st] || "");
+  box.innerHTML = {
+    em: `<b class="t">⚠ すぐに医療機関を受診してください</b>急な症状や強い症状がある場合は、迷わず119番（救急車）を呼んでください。運動・練習は行わないでください。${list}`,
+    incomplete: `<b class="t">未回答が ${sf.left} 問あります</b>すべての質問に答えると、練習メニューを表示できます。`,
+    dr: `<b class="t">運動を始める前に、医師の診察を受けてください</b>次のサインがあります。原因を確かめてから運動を始めましょう。${list}
+      <label class="ov"><input type="checkbox" id="rfOk">医師に相談済みで、運動の許可を得ている</label>`,
+    drok: `<b class="t">医師の許可を確認済み</b>次のサインについて、医師に相談済みで運動の許可を得ています。症状が変わったら練習を中止して受診してください。${list}
+      <label class="ov"><input type="checkbox" id="rfOk" checked>医師に相談済みで、運動の許可を得ている</label>`,
+    ok: `<b class="t">✓ 受診が必要なサインはありません</b>練習中に痛みが強くなる・新しい症状が出た場合は中止して、医療機関や専門家に相談してください。`,
+  }[sf.st];
+  const ov = $("rfOk"); if (ov) ov.addEventListener("change", () => { S.rfOk = ov.checked; updateRF(); });
+  refresh();
+}
+$("rfReset").addEventListener("click", () => { S.rf = {}; S.rfOk = false; renderRFList(); $("secRF").scrollIntoView({ behavior: "smooth", block: "start" }); });
+function rfText() {
+  const sf = safety();
+  if (sf.st === "incomplete") return `未完了（未回答 ${sf.left} 問）`;
+  if (sf.st === "ok") return "受診が必要なサインなし";
+  const items = sf.yes.map(x => x.q).join("／");
+  return sf.st === "em" ? `すぐに受診が必要なサインあり（${items}）` : `受診が必要なサインあり（${items}）${sf.st === "drok" ? "：医師に相談済み・運動の許可あり" : ""}`;
+}
+
+// ---------- ③ 痛み ----------
+const REGIONS = [["neck", "首"], ["shR", "右肩"], ["shL", "左肩"], ["back", "背中"], ["low", "腰"], ["hipR", "右のお尻・股関節"], ["hipL", "左のお尻・股関節"], ["kneeR", "右膝"], ["kneeL", "左膝"], ["footR", "右の足首・足"], ["footL", "左の足首・足"]];
+const TRIGGERS = [["morning", "朝の動き始め"], ["sit", "長く座っていると"], ["stand", "立ちっぱなしで"], ["walk", "歩くと"], ["bend", "前かがみで"], ["arch", "体を反らすと"], ["arm", "腕を上げると"], ["stairs", "階段で"], ["rest", "じっとしていても痛い"]];
+const LIFE = {
+  senior: { title: "転びやすさのチェック（当てはまるものを選択）", items: [["fell", "この1年で転んだことがある"], ["trip", "つまずいたり、ふらついたりすることが増えた"], ["chair", "椅子から立つとき、手で支えないと立てない"], ["walkaid", "杖や手すりがないと歩くのが不安"], ["sock", "片脚立ちで靴下をはくのが難しい"]] },
+  worker: { title: "ふだんの過ごし方（当てはまるものを選択）", items: [["desk", "1日6時間以上、座って過ごす"], ["screen", "スマートフォンやパソコンを長時間見る"], ["noex", "週1回以上の運動習慣がない"], ["lift", "仕事で重い物を持つ・中腰が多い"]] },
+};
+const chipHTML = (list, set, attr) => list.map(([k, l]) => `<button type="button" class="chip" data-${attr}="${k}" aria-pressed="${set.has(k)}">${l}</button>`).join("");
+function bindChips(el, set, attr, after) {
+  el.querySelectorAll(`[data-${attr}]`).forEach(b => b.addEventListener("click", () => {
+    const k = b.dataset[attr]; set.has(k) ? set.delete(k) : set.add(k); b.setAttribute("aria-pressed", String(set.has(k))); after && after();
+  }));
+}
+$("regions").innerHTML = chipHTML(REGIONS, S.regions, "rg");
+bindChips($("regions"), S.regions, "rg", () => { $("painDetail").hidden = !S.regions.size; refresh(); });
+$("triggers").innerHTML = chipHTML(TRIGGERS, S.triggers, "tg");
+bindChips($("triggers"), S.triggers, "tg", refresh);
+$("nrs").addEventListener("input", () => { S.nrs = +$("nrs").value; $("nrsOut").textContent = S.nrs; refresh(); });
+function renderLife() {
+  const L = LIFE[S.mode]; if (!L) { $("lifeBox").innerHTML = ""; return; }
+  S.lifeSet = S.lifeSet || {}; const set = S.lifeSet[S.mode] = S.lifeSet[S.mode] || new Set();
+  $("lifeBox").innerHTML = `<div class="sub">${L.title}</div><div class="chips">${chipHTML(L.items, set, "lf")}</div>`;
+  bindChips($("lifeBox"), set, "lf", refresh);
+}
+const life = () => (S.lifeSet && S.lifeSet[S.mode]) || new Set();
+
+// ---------- ④ 姿勢写真 ----------
+async function getLandmarker() {
+  if (S.landmarker) return S.landmarker;
+  const { FilesetResolver, PoseLandmarker } = await withTimeout(import(VISION_URL + "/vision_bundle.mjs"), 60000, "AIのプログラムを読み込めませんでした。通信状態を確認してください。");
+  const fileset = await withTimeout(FilesetResolver.forVisionTasks(VISION_URL + "/wasm"), 60000, "AIの処理エンジンを読み込めませんでした。通信状態を確認してください。");
+  const opts = d => ({ baseOptions: { modelAssetPath: MODEL_URL, delegate: d }, runningMode: "IMAGE", numPoses: 1 });
+  let lm;
+  if (!IS_IOS) try { lm = await withTimeout(PoseLandmarker.createFromOptions(fileset, opts("GPU")), 30000, "GPU timeout"); } catch (e) { console.warn(e); }
+  if (!lm) lm = await withTimeout(PoseLandmarker.createFromOptions(fileset, opts("CPU")), 90000, "AIモデルを読み込めませんでした。通信状態を確認してください。");
+  return (S.landmarker = lm);
+}
+const deg = r => r * 180 / Math.PI;
+const mid = (p, q) => ({ x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 });
+const ok = x => Number.isFinite(x);
+function angleAt(a, b, c) {
+  const ux = a.x - b.x, uy = a.y - b.y, vx = c.x - b.x, vy = c.y - b.y;
+  return deg(Math.acos(Math.max(-1, Math.min(1, (ux * vx + uy * vy) / (Math.hypot(ux, uy) * Math.hypot(vx, vy))))));
+}
+// 判定の目安（2D写真からの参考値のため、やや広めの基準）
+const PT = { head: [15, 25], trunkF: [8, 15], trunkB: -6, kneeF: 10, kneeH: -5, plumb: [10, 18], tilt: [2.5, 4], headTilt: [3, 5], lat: [3, 5], knee: 0.05 };
+const judge = (v, [w, b]) => !ok(v) ? "na" : v > b ? "bad" : v > w ? "warn" : "ok";
+
+function analyzeSide(p) {
+  const L = p[11].v + p[23].v >= p[12].v + p[24].v; // カメラ側の半身を使う
+  const [E, Sh, Hp, Kn, An] = L ? [p[7], p[11], p[23], p[25], p[27]] : [p[8], p[12], p[24], p[26], p[28]];
+  const dir = Math.sign(p[0].x - mid(p[7], p[8]).x) || 1; // 鼻が耳より前にある向き
+  const head = deg(Math.atan2(dir * (E.x - Sh.x), Sh.y - E.y));
+  const trunk = deg(Math.atan2(dir * (Sh.x - Hp.x), Hp.y - Sh.y));
+  const lineX = Hp.x + (An.x - Hp.x) * (Kn.y - Hp.y) / (An.y - Hp.y);
+  const kneeFlex = 180 - angleAt(Hp, Kn, An), knee = dir * (Kn.x - lineX) < 0 ? -kneeFlex : kneeFlex; // 膝が後ろへ反っていれば負
+  const plumb = 100 * dir * (E.x - An.x) / (An.y - E.y);
+  const rows = [
+    { k: "head", label: "頭の位置（耳と肩のずれ）", val: `${Math.round(head)}°`, st: judge(head, PT.head), note: head > PT.head[0] ? "頭が肩より前に出ている" : "ほぼまっすぐ", normal: `${PT.head[0]}°以下` },
+    { k: "trunk", label: "上半身の傾き（肩と腰）", val: `${Math.round(trunk)}°`, st: trunk < PT.trunkB ? "warn" : judge(trunk, PT.trunkF), note: trunk > PT.trunkF[0] ? "前かがみ・猫背の傾向" : trunk < PT.trunkB ? "上半身が後ろに反る傾向" : "ほぼまっすぐ", normal: `${PT.trunkB}〜${PT.trunkF[0]}°` },
+    { k: "knee", label: "膝の伸び", val: `${Math.round(knee)}°`, st: knee > PT.kneeF || knee < PT.kneeH ? "warn" : "ok", note: knee > PT.kneeF ? "膝が曲がったまま立っている" : knee < PT.kneeH ? "膝が後ろに反っている" : "ほぼまっすぐ", normal: `${PT.kneeH}〜${PT.kneeF}°` },
+    { k: "plumb", label: "重心の位置（耳とくるぶし）", val: `${plumb > 0 ? "前" : "後ろ"} ${Math.abs(Math.round(plumb))}%`, st: plumb < -4 ? "warn" : judge(plumb, PT.plumb), note: plumb > PT.plumb[0] ? "体が前寄り" : plumb < -4 ? "体が後ろ寄り" : "ほぼ真上", normal: `前 ${PT.plumb[0]}%以下` },
+  ];
+  return { head, trunk, knee, plumb, rows, pts: [E, Sh, Hp, Kn, An], dir };
+}
+function analyzeFront(p) {
+  const shL = p[11], shR = p[12], hpL = p[23], hpR = p[24];
+  // 傾きは「本人の右側が下がる」向きを正（正面・背面どちらの写真でも同じ意味になるよう、本人の左右で計算）
+  const tilt = (l, r) => deg(Math.atan2(r.y - l.y, Math.abs(r.x - l.x)));
+  const sh = tilt(shL, shR), hip = tilt(hpL, hpR), headT = tilt(p[7], p[8]);
+  const ux = hpR.x - hpL.x, uy = hpR.y - hpL.y, ul = Math.hypot(ux, uy);
+  const sm = mid(shL, shR), hm = mid(hpL, hpR), vx = sm.x - hm.x, vy = sm.y - hm.y, latc = (vx * ux + vy * uy) / ul;
+  const lat = deg(Math.atan2(latc, Math.hypot(vx - latc * ux / ul, vy - latc * uy / ul))); // 本人の右へ傾くと正
+  // 膝が股関節と足首を結ぶ線より外にあれば O脚、内にあれば X脚 の傾向
+  const kneeOff = (hp, kn, an, outSign) => {
+    const t = (kn.y - hp.y) / (an.y - hp.y), lx = hp.x + (an.x - hp.x) * t, ly = hp.y + (an.y - hp.y) * t;
+    return outSign * ((kn.x - lx) * ux + (kn.y - ly) * uy) / ul / Math.hypot(an.x - hp.x, an.y - hp.y);
+  };
+  const knee = (kneeOff(hpR, p[26], p[28], 1) + kneeOff(hpL, p[25], p[27], -1)) / 2;
+  const side = v => v > 0 ? "右" : "左";
+  const rows = [
+    { k: "sh", label: "肩の高さの左右差", val: `${Math.abs(sh).toFixed(1)}°`, st: judge(Math.abs(sh), PT.tilt), note: Math.abs(sh) > PT.tilt[0] ? `${side(sh)}肩が下がっている` : "ほぼ水平", normal: `${PT.tilt[0]}°以下` },
+    { k: "hip", label: "骨盤の高さの左右差", val: `${Math.abs(hip).toFixed(1)}°`, st: judge(Math.abs(hip), PT.tilt), note: Math.abs(hip) > PT.tilt[0] ? `${side(hip)}の骨盤が下がっている` : "ほぼ水平", normal: `${PT.tilt[0]}°以下` },
+    { k: "headT", label: "頭の傾き", val: `${Math.abs(headT).toFixed(1)}°`, st: judge(Math.abs(headT), PT.headTilt), note: Math.abs(headT) > PT.headTilt[0] ? `${side(-headT)}へ傾いている` : "ほぼまっすぐ", normal: `${PT.headTilt[0]}°以下` },
+    { k: "lat", label: "上半身の左右の傾き", val: `${Math.abs(lat).toFixed(1)}°`, st: judge(Math.abs(lat), PT.lat), note: Math.abs(lat) > PT.lat[0] ? `${side(lat)}へ傾いている` : "ほぼまっすぐ", normal: `${PT.lat[0]}°以下` },
+    { k: "kneeA", label: "膝の向き", val: knee > PT.knee ? "O脚傾向" : knee < -PT.knee ? "X脚傾向" : "まっすぐ", st: Math.abs(knee) > PT.knee ? "warn" : "ok", note: "", normal: "まっすぐ" },
+  ];
+  return { sh, hip, headT, lat, knee, rows };
+}
+const TAG = { ok: "良好", warn: "要確認", bad: "注意", na: "計測不可" };
+async function onPhoto(input) {
+  const view = input.dataset.view, box = view === "side" ? $("phSide") : $("phFront"), st = box.querySelector(".st"), cv = box.querySelector("canvas"), tb = box.querySelector("table");
+  const f = input.files[0]; input.value = ""; if (!f) return;
+  st.classList.remove("err"); tb.hidden = true;
+  try {
+    st.textContent = "写真を読み込んでいます…";
+    const img = await new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error("写真を読み込めませんでした。")); im.src = URL.createObjectURL(f); });
+    const k = Math.min(1, 1100 / Math.max(img.naturalWidth, img.naturalHeight)), W = Math.round(img.naturalWidth * k), H = Math.round(img.naturalHeight * k);
+    cv.width = W; cv.height = H; const ctx = cv.getContext("2d"); ctx.drawImage(img, 0, 0, W, H); cv.hidden = false;
+    URL.revokeObjectURL(img.src);
+    st.textContent = "AIで姿勢を推定しています…（初回は数十秒かかることがあります）";
+    const lm = await getLandmarker();
+    const r = lm.detect(cv);
+    const raw = r.landmarks && r.landmarks[0];
+    if (!raw) throw new Error("人物を検出できませんでした。全身が入るように撮り直してください。");
+    const p = raw.map(q => ({ x: q.x * W, y: q.y * H, v: q.visibility ?? 1 }));
+    const need = [0, 11, 12, 23, 24, 25, 26, 27, 28];
+    if (need.some(i => p[i].v < 0.3 || p[i].y < 0 || p[i].y > H * 1.02)) throw new Error("頭から足先まで全身が写っていないようです。全身が入るように撮り直してください。");
+    const res = view === "side" ? analyzeSide(p) : analyzeFront(p);
+    S.posture[view] = res;
+    drawPosture(ctx, W, H, p, view, res);
+    tb.innerHTML = "<tr><th>項目</th><th>結果</th><th>判定</th></tr>" + res.rows.map(x => `<tr><td>${x.label}<div class="hint">${x.note}</div></td><td class="n">${x.val}</td><td><span class="tag ${x.st}">${TAG[x.st]}</span></td></tr>`).join("");
+    tb.hidden = false;
+    st.textContent = "計測しました。線（重心線・水平線）は目安です。";
+    refresh();
+  } catch (e) {
+    console.error(e); S.posture[view] = null;
+    st.textContent = e.message || String(e); st.classList.add("err");
+  }
+}
+document.querySelectorAll("#secPhoto input[type=file]").forEach(i => i.addEventListener("change", () => onPhoto(i)));
+function drawPosture(ctx, W, H, p, view, res) {
+  const lw = Math.max(2, W / 220);
+  ctx.lineCap = "round";
+  const line = (a, b, col, w = lw) => { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); };
+  const dot = (q, col) => { ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(q.x, q.y, lw * 2.2, 0, 7); ctx.fill(); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(q.x, q.y, lw * 1.5, 0, 7); ctx.fill(); };
+  ctx.setLineDash([lw * 3, lw * 2]);
+  if (view === "side") {
+    const An = res.pts[4];
+    line({ x: An.x, y: 0 }, { x: An.x, y: H }, "#1c7ed6", lw); // くるぶしを通る重心線の目安
+  } else {
+    const am = mid(p[27], p[28]);
+    line({ x: am.x, y: 0 }, { x: am.x, y: H }, "#1c7ed6", lw);
+    for (const [a, b] of [[11, 12], [23, 24]]) { const y = (p[a].y + p[b].y) / 2; line({ x: 0, y }, { x: W, y }, "rgba(28,126,214,.6)", lw * 0.8); }
+  }
+  ctx.setLineDash([]);
+  if (view === "side") {
+    const q = res.pts; for (let i = 0; i < 4; i++) line(q[i], q[i + 1], "#e8590c", lw * 1.4); q.forEach(x => dot(x, "#e8590c"));
+  } else {
+    for (const [a, b] of [[11, 12], [23, 24], [11, 23], [12, 24], [23, 25], [25, 27], [24, 26], [26, 28], [7, 8]]) line(p[a], p[b], "#e8590c", lw * 1.2);
+    [7, 8, 11, 12, 23, 24, 25, 26, 27, 28].forEach(i => dot(p[i], "#e8590c"));
+  }
+}
+
+// ---------- ⑤ 結果：考えられる傾向と練習 ----------
+const has = (...ks) => ks.some(k => S.regions.has(k));
+const trig = (...ks) => ks.some(k => S.triggers.has(k));
+const pst = (v, k) => { const r = S.posture[v]; const x = r && r.rows.find(y => y.k === k); return x ? x.st : "na"; };
+const pbad = (v, k) => ["warn", "bad"].includes(pst(v, k));
+function findFindings() {
+  const F = [], add = (sev, title, why, basis, ex) => F.push({ sev, title, why, basis: basis.filter(Boolean), ex });
+  const sd = S.posture.side, fr = S.posture.front, lf = life();
+  const neckSh = has("neck", "shR", "shL"), shSide = ["shR", "shL"].filter(k => S.regions.has(k)).map(k => k === "shR" ? "右" : "左").join("・");
+  if (S.nrs >= 7 && S.regions.size) add("bad", "痛みが強い状態です", "痛みが強いうちは無理に練習せず、まず医療機関で相談することをおすすめします。練習は痛みが増えない範囲の軽いものから始めてください。", [`痛みの強さ ${S.nrs}/10`], []);
+  if (trig("rest") && S.regions.size) add("bad", "じっとしていても痛む", "動かさなくても続く痛みは、筋肉や関節の使い方以外の原因のこともあります。続く場合は医療機関で相談してください。", ["「じっとしていても痛い」を選択"], []);
+  if (neckSh && pbad("side", "head")) add(pst("side", "head") === "bad" ? "bad" : "warn", "頭が前に出た姿勢（スマホ首）の傾向", "頭が肩より前に出ると、首や肩の後ろの筋肉に負担がかかり、こりや痛みにつながりやすくなります。", [`首・肩の痛み`, `横の写真：頭の位置 ${Math.round(sd.head)}°`], ["chinTuck", "pecStretch", "scapSqueeze", "trunkExt"]);
+  else if (neckSh) add("warn", "首・肩まわりの筋肉の疲れの傾向", "同じ姿勢が続く、肩に力が入りやすいなどで、首から肩の筋肉がこわばりやすい状態です。", [`痛む場所：${[has("neck") && "首", shSide && shSide + "肩"].filter(Boolean).join("・")}`, lf.has("screen") && "画面を長時間見る"], ["upperTrapStretch", "scapSqueeze", "chinTuck"]);
+  if (has("shR", "shL") && trig("arm")) add("warn", "腕を上げる動きでの肩の負担", "胸や肩甲骨まわりが硬いと、腕を上げるときに肩に負担が集中しやすくなります。腕が途中までしか上がらない・夜に痛む場合は受診を検討してください。", [`${shSide}肩・腕を上げると痛い`], ["pecStretch", "scapSqueeze", "trunkExt"]);
+  if (has("back") || (has("neck", "low") && pbad("side", "trunk") && sd && sd.trunk > 0)) add("warn", "猫背・前かがみ姿勢の傾向", "背中が丸まると、首・背中・腰の筋肉が引き伸ばされた状態で働き続け、疲れや痛みにつながりやすくなります。", [has("back") && "背中の痛み", sd && `横の写真：上半身の傾き ${Math.round(sd.trunk)}°`], ["trunkExt", "pecStretch", "iliopsoasStretch"]);
+  if (has("low")) {
+    if (trig("bend")) add("warn", "前かがみで強まる腰の痛みの傾向", "前かがみの姿勢で腰の負担が増える傾向です。太もも裏や股関節が硬いと、腰が代わりに曲がりやすくなります。長く座る姿勢もこまめに崩しましょう。", ["腰・前かがみで痛い"], ["hamStretch", "trunkExt", "drawIn"]);
+    if (trig("arch", "stand")) add("warn", "反らす・立ちっぱなしで強まる腰の痛みの傾向（反り腰傾向）", "腰が反りやすい姿勢では、腰の後ろに負担が集まりやすくなります。股関節の前を伸ばし、お腹の力で骨盤を安定させる練習が役立ちます。", [trig("arch") && "体を反らすと痛い", trig("stand") && "立ちっぱなしで痛い"], ["iliopsoasStretch", "pelvicTilt", "drawIn"]);
+    if (trig("sit") || lf.has("desk")) add("warn", "座りっぱなしによる腰の負担", "長く座ると股関節の前が縮んだままになり、腰や背中が丸まりやすくなります。30〜60分に1回は立ち上がって体を伸ばしましょう。", [trig("sit") && "長く座ると痛い", lf.has("desk") && "1日6時間以上座る"], ["iliopsoasStretch", "trunkExt", "hamStretch"]);
+    if (!trig("bend", "arch", "stand", "sit") && !lf.has("desk")) add("warn", "腰まわりを支える力・柔軟性の低下の傾向", "お腹やお尻の筋肉で腰を支える力と、股関節の柔らかさを保つことが腰の負担を減らします。", ["腰の痛み"], ["drawIn", "bridge", "iliopsoasStretch"]);
+    if (lf.has("lift")) add("info", "重い物を持つ・中腰の多い仕事", "物を持つときは膝を曲げて腰を落とし、荷物を体に近づけて持ちましょう。お腹に力を入れてから持ち上げると腰が安定します。", ["重い物・中腰が多い"], ["drawIn", "bridge"]);
+  }
+  if (has("hipR", "hipL")) add("warn", "お尻・股関節まわりの筋力と柔軟性の低下の傾向", "お尻の筋肉は歩く・立つときに骨盤を支えます。弱ったり硬くなったりすると、股関節や腰に負担がかかりやすくなります。", [`痛む場所：${["hipR", "hipL"].filter(k => S.regions.has(k)).map(k => k === "hipR" ? "右" : "左").join("・")}のお尻・股関節`, pbad("front", "hip") && "正面の写真：骨盤の高さに左右差"], ["clamshell", "bridge", "iliopsoasStretch"]);
+  if (has("kneeR", "kneeL")) {
+    const kn = ["kneeR", "kneeL"].filter(k => S.regions.has(k)).map(k => k === "kneeR" ? "右" : "左").join("・");
+    add("warn", "膝を支える太ももの筋力の低下の傾向", "太ももの前の筋肉は、膝にかかる衝撃を和らげるクッションの役割をします。弱ると、歩く・階段・立ち上がりで膝に負担がかかりやすくなります。", [`${kn}膝の痛み`, trig("stairs") && "階段で痛い", trig("walk") && "歩くと痛い", pbad("side", "knee") && sd && sd.knee > 0 && "横の写真：膝が曲がったまま立っている", fr && Math.abs(fr.knee) > PT.knee && `正面の写真：${fr.knee > 0 ? "O脚" : "X脚"}傾向`], ["quadSet", "kneeExt", "hamStretch", "sitToStand"]);
+  }
+  if (has("footR", "footL")) add("warn", "ふくらはぎ・足首まわりの硬さや筋力低下の傾向", "ふくらはぎが硬い、すねの筋肉が弱いと、足首の動きが小さくなり、足や膝への負担・つまずきにつながります。", ["足首・足の痛み"], ["calfStretch", "toeRaise", "heelRaise"]);
+  if (fr && (pbad("front", "sh") || pbad("front", "lat") || pbad("front", "hip"))) add("info", "体の左右のバランスの崩れの傾向", "肩や骨盤の高さ、上半身の傾きに左右差があります。片側ばかりで荷物を持つ・脚を組むなどの癖も見直しましょう。", fr.rows.filter(x => ["sh", "lat", "hip"].includes(x.k) && x.st !== "ok").map(x => `正面の写真：${x.note}`), ["sideBend", "weightShift", "sideLegRaise"]);
+  if (sd && sd.trunk > PT.trunkF[0] && !F.some(x => x.title.startsWith("猫背"))) add("info", "前かがみ姿勢の傾向", "上半身が前に傾いた立ち方は、腰や背中の筋肉に負担がかかりやすくなります。", [`横の写真：上半身の傾き ${Math.round(sd.trunk)}°`], ["trunkExt", "iliopsoasStretch", "bridge"]);
+  if (S.mode === "senior") {
+    const n = ["fell", "trip", "chair", "walkaid", "sock"].filter(k => lf.has(k)).length;
+    if (n) add(n >= 2 || lf.has("fell") ? "bad" : "warn", "転びやすさの傾向", "脚の筋力やバランスの力が落ちると、転びやすくなります。毎日少しずつ、支えのある場所で練習しましょう。転んだことがある方は、家の中の段差や照明も見直しましょう。", LIFE.senior.items.filter(([k]) => lf.has(k)).map(([, l]) => l), ["sitToStand", "singleLeg", "heelRaise", "sideStep", "marching"]);
+    if (sd && sd.plumb > PT.plumb[0]) add("info", "体が前寄りの立ち方", "体の重心が前に寄っていると、つまずいたときに前へ転びやすくなります。", [`横の写真：重心の位置 前 ${Math.round(sd.plumb)}%`], ["trunkExt", "heelRaise", "weightShift"]);
+  }
+  if (S.mode === "worker" && lf.has("noex")) add("info", "運動習慣がない", "まずは1日5分から。通勤で一駅歩く、階段を使うなど、生活の中で体を動かす時間を増やしましょう。", ["週1回以上の運動習慣がない"], []);
+  return F;
+}
+const DEFAULT_EX = { senior: ["sitToStand", "heelRaise", "singleLeg"], worker: ["chinTuck", "trunkExt", "iliopsoasStretch"] };
+const GROUPS = [
+  ["首・肩・背中", ["chinTuck", "upperTrapStretch", "scapSqueeze", "pecStretch", "trunkExt", "sideBend"]],
+  ["腰・お腹", ["drawIn", "pelvicTilt", "bridge", "iliopsoasStretch", "hamStretch"]],
+  ["膝・脚", ["quadSet", "kneeExt", "sitToStand", "rfStretch", "seatedKneeFlex", "calfStretch", "toeRaise", "heelRaise", "standHipExt", "marching", "clamshell", "sideLegRaise"]],
+  ["バランス・歩く", ["weightShift", "stepPractice", "singleLeg", "sideStep", "heelStrikeWalk", "strideWalk", "metronome"]],
+];
+const exItem = e => `<label class="ex"><input type="checkbox" data-ex="${e}" ${S.picked.has(e) ? "checked" : ""}>
+  <span><b>${EX[e].name}</b><span class="dose">${EX[e].dose}</span>
+  <div class="how">${EX[e].how}</div>${EX[e].caution ? `<div class="caution">注意：${EX[e].caution}</div>` : ""}${figHTML(e)}</span></label>`;
+
+function refresh() {
+  const sf = safety();
+  $("go").disabled = !S.mode || sf.st === "incomplete";
+  $("goHint").textContent = !S.mode ? "①でシニア／働く世代を選んでください" : sf.st === "incomplete" ? `②安全チェックに答えてください（残り ${sf.left} 問）` : "";
+  if (S.shown) renderResult(false);
+}
+$("go").addEventListener("click", () => { S.shown = true; renderResult(true); $("secResult").scrollIntoView({ behavior: "smooth", block: "start" }); });
+
+function renderResult(resetPicks) {
+  const sf = safety();
+  $("secResult").hidden = false;
+  if (!safeToExercise()) {
+    S.findings = []; S.picked = new Set();
+    $("result").innerHTML = `<div class="gate ${sf.st}">${{
+      em: "<b>練習メニューは表示しません。</b>すぐに医療機関を受診してください（②安全チェックを参照）。",
+      dr: "<b>練習メニューは保留中です。</b>運動の前に医師の診察を受けてください。医師に相談済みで運動の許可がある場合は、②安全チェックでチェックを入れてください。",
+      incomplete: `<b>②安全チェックにすべて答えてください。</b>（残り ${sf.left} 問）`,
+    }[sf.st]}</div>`;
+    $("more").hidden = true; setBar(false); renderCTA(); updateOutputs(); return;
+  }
+  const keep = !resetPicks && S.picked.size;
+  S.findings = findFindings();
+  if (!keep) {
+    S.picked = new Set(S.findings.flatMap(x => x.ex.slice(0, 2)));
+    if (!S.picked.size) DEFAULT_EX[S.mode].forEach(e => S.picked.add(e));
+  }
+  const shown = new Set();
+  const sum = [`<b>${S.mode === "senior" ? "シニア" : "働く世代"}</b>`, S.regions.size ? `痛む場所：${REGIONS.filter(([k]) => S.regions.has(k)).map(([, l]) => l).join("・")}（強さ ${S.nrs}/10）` : "痛みの入力なし",
+    `姿勢の写真：${[S.posture.side && "横", S.posture.front && "正面"].filter(Boolean).join("・") || "なし"}`];
+  let h = `<p class="hint" style="margin:0">${sum.join("　")}</p>`;
+  if (sf.st === "drok") h += `<div class="gate dr" style="margin-top:10px">医師の許可を得ている前提で練習を表示しています。症状が変わったら中止して受診してください。</div>`;
+  h += S.findings.length ? S.findings.map(x => `<div class="issue ${x.sev}"><h3>${x.title}</h3><p>${x.why}</p>${x.basis.length ? `<p class="basis">根拠：${x.basis.join("／")}</p>` : ""}${x.ex.filter(e => !shown.has(e) && shown.add(e)).map(exItem).join("")}</div>`).join("")
+    : `<div class="issue info"><h3>目立った傾向はありませんでした</h3><p>今の状態を保つための練習を選んでいます。</p>${DEFAULT_EX[S.mode].filter(e => shown.add(e)).map(exItem).join("")}</div>`;
+  $("result").innerHTML = h;
+  $("moreList").innerHTML = GROUPS.map(([g, ids]) => { const rest = ids.filter(e => !shown.has(e)); return rest.length ? `<h4>${g}</h4>` + rest.map(exItem).join("") : ""; }).join("");
+  $("more").hidden = false;
+  $("secResult").querySelectorAll("input[data-ex]").forEach(cb => cb.addEventListener("change", () => { cb.checked ? S.picked.add(cb.dataset.ex) : S.picked.delete(cb.dataset.ex); updateOutputs(); }));
+  setBar(true); renderCTA(); updateOutputs();
+}
+function renderCTA() {
+  $("ctaBox").innerHTML = `<div class="cta"><b>${CONTACT.title}</b><p>${CONTACT.text}</p>${CONTACT.url ? `<a class="btn primary" href="${esc(CONTACT.url)}" target="_blank" rel="noopener">${CONTACT.label}</a>` : `<span class="hint">（相談窓口の連絡先は準備中です）</span>`}</div>`;
+}
+function setBar(on) { $("printbar").hidden = !on; document.body.classList.toggle("has-bar", on); }
+function recordText() {
+  const L = [`【からだセルフチェック】${$("edate").value.replaceAll("-", "/")}${$("pname").value ? "　" + $("pname").value : ""}`];
+  L.push(`区分：${S.mode === "senior" ? "シニア" : S.mode === "worker" ? "働く世代" : "未選択"}`);
+  L.push(`安全チェック：${rfText()}`);
+  if (S.regions.size) L.push(`痛む場所：${REGIONS.filter(([k]) => S.regions.has(k)).map(([, l]) => l).join("・")}　強さ ${S.nrs}/10　${S.triggers.size ? "痛むとき：" + TRIGGERS.filter(([k]) => S.triggers.has(k)).map(([, l]) => l).join("・") : ""}`);
+  const lf = life(); if (S.mode && lf.size) L.push(`${S.mode === "senior" ? "転びやすさ" : "生活"}：${LIFE[S.mode].items.filter(([k]) => lf.has(k)).map(([, l]) => l).join("・")}`);
+  for (const [v, n] of [["side", "横"], ["front", "正面"]]) if (S.posture[v]) L.push(`姿勢（${n}）：` + S.posture[v].rows.map(x => `${x.label} ${x.val}[${TAG[x.st]}]`).join("、"));
+  if (S.findings.length) { L.push("考えられる傾向："); S.findings.forEach((x, i) => L.push(`${i + 1}. ${x.title}`)); }
+  L.push("自主練習：" + (safeToExercise() ? [...S.picked].map(e => `${EX[e].name}（${EX[e].dose}）`).join("、") : "安全チェックの結果により保留"));
+  L.push("※診断ではなく、からだの使い方の傾向の目安です。");
+  return L.join("\n");
+}
+function updateOutputs() {
+  $("record").value = recordText();
+  $("pickCnt").textContent = `練習 ${S.picked.size} 個を選択中`;
+  const name = $("pname").value.trim();
+  $("handout").innerHTML = `<h1>あなたの自主練習メニュー</h1>
+    <div>${$("edate").value.replaceAll("-", "/")}${name ? "　" + esc(name) + " 様" : ""}</div>
+    ${S.findings.length ? `<div class="sum"><b>チェックで分かった傾向</b><ul>${S.findings.map(x => `<li>${x.title}</li>`).join("")}</ul></div>` : ""}
+    <p>無理のない範囲で毎日続けましょう。痛みが強くなる・しびれが出るなど体調が変わったら中止して、医療機関や専門家に相談してください。</p>` +
+    [...S.picked].map((k, i) => { const x = EX[k]; return `<div class="hx"><div><b>${i + 1}. ${x.name}</b><div class="dz">回数：${x.dose}</div><div>${x.how}</div>${x.caution ? `<div>⚠ ${x.caution}</div>` : ""}<div class="chk">実施　□月 □火 □水 □木 □金 □土 □日</div></div>${figHTML(k)}</div>`; }).join("") +
+    `<div class="contact"><b>${CONTACT.title}</b><div>${CONTACT.text}</div>${CONTACT.url ? `<div>${CONTACT.label}：${esc(CONTACT.url)}</div>` : ""}</div>`;
+}
+for (const id of ["pname", "edate"]) $(id).addEventListener("input", () => { if (S.shown) updateOutputs(); });
+$("copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("record").value); toast("コピーしました。"); }
+  catch { $("record").select(); document.execCommand("copy"); toast("コピーしました。"); }
+});
+$("print").addEventListener("click", () => {
+  if (!safeToExercise()) return toast("安全チェックを確認してください。");
+  if (!S.picked.size) return toast("練習を1つ以上選んでください。");
+  const root = document.documentElement, theme = root.dataset.theme;
+  root.dataset.theme = "light";
+  const done = () => { if (theme) root.dataset.theme = theme; else delete root.dataset.theme; window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done);
+  window.print();
+});
+renderRFList();
+refresh();
+</script>
