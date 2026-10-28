@@ -1,0 +1,794 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>からだ年齢チェック</title>
+<meta name="description" content="椅子立ち上がり・片脚立ち・2ステップテストなど家でできる体力テストから、からだ年齢（運動機能の目安）とロコモ度を確認し、イラスト付きの自主練習メニューを作ります。">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Zen+Kaku+Gothic+New:wght@500;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 上から ①基本情報 ②安全チェック ③体力テスト（ストップウォッチ付きカード×5）④結果（からだ年齢の大きな数字・能力別バー・ロコモ度・練習）。画面下に印刷バー */
+:root {
+  --bg: #f3f5f4;
+  --surface: #ffffff;
+  --surface-2: #e9eeec;
+  --ink: #1b2a2f;
+  --ink-2: #4a5b60;
+  --muted: #7a8a8e;
+  --line: #d3dcda;
+  --accent: #1f6f78;
+  --accent-soft: #d6ebec;
+  --ok: #2e7d4f;
+  --warn: #8a6a12;
+  --bad: #b5532f;
+  --warn-soft: #f7ecd8;
+  --bad-soft: #f6e1d8;
+  --left: #2f6db5;       /* 左下肢 */
+  --right: #c0602a;      /* 右下肢 */
+  --f-display: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --f-body: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+  --f-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111a1c; --surface: #182427; --surface-2: #213034; --ink: #e4ecea; --ink-2: #b2c1c0; --muted: #84979a;
+    --line: #2f4247; --accent: #5fb5bd; --accent-soft: #1d3a3e; --ok: #6cc191; --warn: #e0b552; --bad: #e3875f;
+    --warn-soft: #3a2f1c; --bad-soft: #3d241b; --left: #78a9e6; --right: #ec9a62; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111a1c; --surface: #182427; --surface-2: #213034; --ink: #e4ecea; --ink-2: #b2c1c0; --muted: #84979a;
+  --line: #2f4247; --accent: #5fb5bd; --accent-soft: #1d3a3e; --ok: #6cc191; --warn: #e0b552; --bad: #e3875f;
+  --warn-soft: #3a2f1c; --bad-soft: #3d241b; --left: #78a9e6; --right: #ec9a62; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 16px 48px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; }
+header { padding: 22px 0 6px; }
+header h1 { font-size: 26px; font-weight: 900; }
+header p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; }
+header a { color: var(--accent); font-weight: 700; font-size: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; margin-top: 16px; }
+.card h2 { font-size: 18px; display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.card h2 .no { font-family: var(--f-num); color: var(--accent); font-size: 15px; }
+.hint { font-size: 13px; color: var(--ink-2); }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn { font: inherit; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 14px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; text-decoration: none; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+:root[data-theme="dark"] .btn.primary { color: #0d1a1c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.primary { color: #0d1a1c; } }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+button:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+label.f { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink-2); }
+input[type=text], input[type=number], input[type=date], select { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; min-width: 0; }
+.grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { font: inherit; padding: 7px 14px; border: 0; background: var(--surface); color: var(--ink); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; font-weight: 700; }
+.test { border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-top: 12px; }
+.test h3 { font-size: 17px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.test h3 small { font-family: var(--f-body); font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 1px 8px; border-radius: 10px; }
+.test ol { margin: 6px 0 0; padding-left: 1.3em; font-size: 14px; }
+.test .caution { font-size: 13px; color: var(--bad); margin-top: 4px; }
+.sw { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }
+.sw output { font-family: var(--f-num); font-size: 30px; font-weight: 600; min-width: 5ch; text-align: right; }
+.sw .btn { min-width: 96px; padding: 12px 16px; font-size: 16px; }
+.val { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.val input { width: 110px; font-family: var(--f-num); font-size: 18px; }
+.val .tage { font-size: 14px; font-weight: 700; color: var(--accent); }
+.levels { display: grid; gap: 6px; margin-top: 8px; }
+.levels label { display: flex; gap: 8px; align-items: center; font-size: 14px; cursor: pointer; }
+.levels input { width: 18px; height: 18px; }
+.big { text-align: center; padding: 18px 10px; border-radius: 12px; background: var(--accent-soft); }
+.big .lbl { font-weight: 700; color: var(--ink-2); }
+.big .age { font-family: var(--f-display); font-size: 64px; font-weight: 900; line-height: 1.1; color: var(--accent); }
+.big .age small { font-size: 24px; }
+.big .diff { font-size: 18px; font-weight: 700; }
+.big .prev { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+.bars { margin-top: 14px; display: grid; gap: 10px; }
+.bar .top { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; }
+.bar .track { position: relative; height: 12px; background: var(--surface-2); border-radius: 6px; margin-top: 4px; }
+.bar .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; }
+.bar .real { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+.bar .scale { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.good { color: var(--ok); } .mid { color: var(--warn); } .weak { color: var(--bad); }
+.fill.good { background: var(--ok); } .fill.mid { background: var(--warn); } .fill.weak { background: var(--bad); }
+.loco { margin-top: 14px; border-radius: 8px; padding: 12px 14px; border: 1px solid var(--line); }
+.loco.l0 { border-left: 5px solid var(--ok); } .loco.l1 { border-left: 5px solid var(--warn); } .loco.l2, .loco.l3 { border-left: 5px solid var(--bad); }
+.loco b { font-size: 16px; }
+.ex { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; padding: 8px 0; border-top: 1px dashed var(--line); }
+.ex input { margin-top: 5px; width: 18px; height: 18px; }
+.ex b { font-size: 15px; }
+.ex .dose { font-family: var(--f-num); font-size: 13px; color: var(--accent); margin-left: 6px; }
+.ex .how { font-size: 13px; color: var(--ink-2); }
+.ex .caution { font-size: 12px; color: var(--bad); }
+.sub { margin: 16px 0 4px; font-size: 15px; font-weight: 700; }
+.figw { margin: 8px 0 2px; max-width: 460px; }
+.figw .tip { font-size: 12px; font-weight: 700; color: var(--ink-2); display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.figw .tip i { width: 14px; height: 8px; border-radius: 4px; background: #e8590c; display: inline-block; }
+.fig { display: flex; align-items: flex-start; gap: 4px; }
+.fig figure { margin: 0; flex: 1; min-width: 0; }
+.fig svg { display: block; width: 100%; height: auto; background: #fff; border: 1px solid var(--line); border-radius: 8px; }
+.fig figcaption { font-size: 13px; line-height: 1.45; color: var(--ink); margin-top: 4px; }
+.fig figcaption b { color: var(--accent); }
+.fig .fa { color: var(--accent); font-size: 16px; align-self: center; margin-top: -1.6em; }
+.fig svg polyline, .fig svg path, .fig svg line { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+/* イラストは画面の配色に関係なく白地に描く（印刷と同じ見た目） */
+.fig .near { stroke: #22343a; stroke-width: 5; }
+.fig .near .tr { stroke-width: 8.5; }
+.fig .near .halo { stroke: #fff; stroke-width: 7.5; }
+.fig .hd { fill: #22343a; stroke: #fff; stroke-width: 1.2; }
+.fig .far { stroke: #a8b5b8; stroke-width: 4.6; }
+.fig .gh { stroke: #9aa8ab; stroke-width: 1.3; stroke-dasharray: 2.5 2; fill: none; }
+.fig .gh circle { fill: none; }
+.fig .fl { fill: #eef1f0; }
+.fig .gr { stroke: #8a989b; stroke-width: 1; }
+.fig .pr { stroke: #6f7f83; stroke-width: 2.2; fill: none; stroke-linecap: round; }
+.fig .hatch { stroke: #6f7f83; stroke-width: 1; }
+.fig .mat { fill: #cfe6e8; stroke: #6f9ea3; stroke-width: .6; }
+.fig .towel { fill: #f3d9a6; stroke: #b0812a; stroke-width: 1; }
+.fig .tape { fill: #e0a800; }
+.fig .nt { fill: #1f6f78; font-size: 12px; font-weight: 700; }
+.fig .hl { stroke: #e8590c; }
+.fig .far .hl { stroke: #f08c4f; }
+.fig .hld { fill: #e8590c; stroke: #fff; stroke-width: 1.2; }
+.fig .ar { stroke: #1c7ed6; stroke-width: 2.4; }
+.fig .arh { fill: #1c7ed6; stroke: none; }
+.rfg { margin: 10px 0 2px; font-size: 13px; font-weight: 700; }
+.rfg.em { color: var(--bad); } .rfg.dr { color: var(--warn); }
+.rfq { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.yn { display: flex; gap: 6px; }
+.yn label { cursor: pointer; }
+.yn input { position: absolute; opacity: 0; pointer-events: none; }
+.yn span { display: inline-block; min-width: 64px; text-align: center; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; font-weight: 700; color: var(--ink-2); background: var(--surface); }
+.yn input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.yn input.y:checked + span { background: var(--bad); border-color: var(--bad); color: #fff; }
+.yn input.n:checked + span { background: var(--surface-2); border-color: var(--ink-2); color: var(--ink); }
+.rfbox { margin-top: 12px; border-radius: 8px; padding: 12px 14px; font-size: 14px; border: 1px solid var(--line); background: var(--surface-2); }
+.rfbox b.t { display: block; font-size: 16px; margin-bottom: 4px; }
+.rfbox ul { margin: 4px 0 0; padding-left: 1.3em; }
+.rfbox.em { background: var(--bad-soft); border: 2px solid var(--bad); }
+.rfbox.em b.t { color: var(--bad); }
+.rfbox.dr { background: var(--warn-soft); border: 2px solid var(--warn); }
+.rfbox.dr b.t { color: var(--warn); }
+.rfbox.ok b.t { color: var(--ok); }
+.rfbox label.ov { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; font-weight: 700; cursor: pointer; }
+.rfbox label.ov input { width: 18px; height: 18px; margin-top: 2px; }
+.gate { border-radius: 8px; padding: 12px 14px; margin-top: 10px; font-size: 14px; }
+.gate.em { background: var(--bad-soft); border: 2px solid var(--bad); }
+.gate.dr, .gate.incomplete { background: var(--warn-soft); border: 2px solid var(--warn); }
+.cta { margin-top: 16px; border: 2px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 14px; }
+.cta b { font-family: var(--f-display); font-size: 17px; display: block; }
+.cta p { margin: 4px 0 8px; font-size: 14px; }
+details.more { margin-top: 14px; border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; }
+details.more summary { cursor: pointer; font-weight: 700; }
+textarea.out { width: 100%; min-height: 160px; font-family: var(--f-num); font-size: 13px; color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 10px; margin-top: 8px; }
+.note { font-size: 12px; color: var(--muted); margin-top: 10px; }
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-size: 14px; z-index: 10; max-width: calc(100% - 32px); }
+.printbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -4px 12px rgba(0,0,0,.08); }
+body.has-bar .wrap { padding-bottom: 96px; }
+body.has-bar .toast { bottom: 84px; }
+#handout { display: none; }
+@page { size: A4; margin: 14mm 12mm; }
+@media print {
+  :root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+    --bg: #fff; --surface: #fff; --surface-2: #e9eeec; --ink: #1b2a2f; --ink-2: #4a5b60; --muted: #7a8a8e; --line: #d3dcda;
+    --accent: #1f6f78; --accent-soft: #d6ebec; --ok: #2e7d4f; --warn: #8a6a12; --bad: #b5532f; --warn-soft: #f7ecd8; --bad-soft: #f6e1d8; color-scheme: light;
+  }
+  body { background: #fff; color: #000; }
+  .wrap > *:not(#handout), .printbar, .toast { display: none !important; }
+  body.has-bar .wrap { padding: 0; }
+  #handout { display: block; font-size: 14px; }
+  #handout h1 { font-size: 22px; margin-bottom: 4px; }
+  #handout .big { margin-top: 8px; padding: 10px; border: 2px solid #1f6f78; }
+  #handout .big .age { font-size: 48px; }
+  #handout table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+  #handout th, #handout td { border: 1px solid #bbb; padding: 4px 6px; text-align: left; }
+  #handout .hx { display: grid; grid-template-columns: 1fr 96mm; gap: 12px; align-items: start; border: 1px solid #999; border-radius: 6px; padding: 8px 12px; margin-top: 8px; break-inside: avoid; }
+  #handout .hx b { font-size: 17px; }
+  #handout .dz { font-weight: 700; margin: 2px 0; }
+  #handout .chk { margin-top: 6px; font-size: 13px; }
+  #handout .figw { max-width: none; margin: 0; }
+  #handout .contact { border: 2px solid #1f6f78; border-radius: 6px; padding: 8px 12px; margin-top: 10px; break-inside: avoid; }
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>からだ年齢チェック</h1>
+    <p>家でできる体力テストで、あなたの「からだ年齢」（運動機能の目安）を測ります。結果に合わせて、イラスト付きの練習メニューも作ります。</p>
+    <p><a href="./">痛みや姿勢が気になる方は「からだセルフチェック」へ →</a></p>
+  </header>
+
+  <section class="card">
+    <h2><span class="no">1</span>あなたについて</h2>
+    <div class="grid3">
+      <label class="f">年齢（歳）<input type="number" id="age" min="20" max="100" inputmode="numeric" placeholder="例）68"></label>
+      <label class="f">身長（cm）<input type="number" id="height" min="100" max="210" inputmode="decimal" placeholder="例）158"></label>
+      <div class="f" style="display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink-2)">性別<div class="seg" id="sex"><button type="button" data-sex="m" aria-pressed="false">男性</button><button type="button" data-sex="f" aria-pressed="false">女性</button></div></div>
+      <label class="f">お名前（任意）<input type="text" id="pname" autocomplete="off"></label>
+      <label class="f">測定日<input type="date" id="edate"></label>
+    </div>
+  </section>
+
+  <section class="card" id="secRF">
+    <h2><span class="no">2</span>安全チェック（必ず回答）</h2>
+    <p class="hint" style="margin:0 0 8px">体力テストの前に、医療機関の受診が必要なサインがないか確認します。今の状態について、すべての質問に答えてください。</p>
+    <div id="rfList"></div>
+    <div class="rfbox" id="rfResult" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="card" id="secTests">
+    <h2><span class="no">3</span>体力テスト</h2>
+    <p class="hint" style="margin:0">できるテストだけで大丈夫です（2つ以上で、からだ年齢を計算します）。<b>転ばないよう、必ず家族などがそばにいる状態で、支えになる物の近くで</b>行ってください。痛みが出たら中止してください。</p>
+    <div id="testGate" class="gate incomplete" style="margin-top:10px">②安全チェックにすべて答えると、テストを始められます。</div>
+    <div id="tests" hidden></div>
+  </section>
+
+  <section class="card">
+    <div class="row"><button class="btn primary" id="go" type="button" style="font-size:17px;padding:12px 20px">からだ年齢を見る</button><span class="hint" id="goHint"></span></div>
+  </section>
+
+  <section class="card" id="secResult" hidden>
+    <h2><span class="no">4</span>結果</h2>
+    <div id="result"></div>
+    <div id="ctaBox"></div>
+    <details class="more"><summary>記録用テキスト（コピーして保存・共有）</summary>
+      <div class="row" style="margin-top:8px"><button class="btn" id="copy" type="button">コピー</button></div>
+      <textarea class="out" id="record" readonly aria-label="記録用テキスト"></textarea>
+    </details>
+    <p class="note">※ からだ年齢は、公表されている体力測定の年代別の値などをもとにした目安で、健康状態や病気を診断するものではありません。測る環境や方法で結果は変わります。</p>
+  </section>
+
+  <div id="handout"></div>
+</div>
+<div class="printbar" id="printbar" hidden>
+  <button class="btn primary" id="print" type="button">🖨 結果と練習メニューを印刷</button>
+</div>
+
+<script type="module">
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const toast = msg => { const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.append(t); setTimeout(() => t.remove(), 2600); };
+const ok = x => Number.isFinite(x);
+
+// 相談・予約の窓口（訪問ストレッチなど）。url を入れると結果画面と印刷に表示される
+const CONTACT = {
+  title: "からだ年齢を若返らせたい方へ",
+  text: "理学療法士などの専門家が、ご自宅でからだの状態を確認し、ストレッチや運動を一緒に行います。",
+  label: "相談・予約はこちら",
+  url: "",
+};
+
+// 年代別の基準値：[年齢, 男性, 女性]。体力測定の公表データ（新体力テスト等）や先行研究をもとにした近似値。
+// 事業で使う前に出典の表で確認し、必要に応じて差し替えること。
+const NORM = {
+  chair: { better: "low", rows: [[20, 6.0, 6.2], [30, 6.4, 6.6], [40, 7.0, 7.3], [50, 7.9, 8.3], [60, 9.4, 9.9], [70, 11.4, 12.0], [80, 14.0, 14.8], [90, 17.0, 18.0]] },          // 椅子立ち上がり5回（秒）
+  stance: { better: "high", rows: [[20, 58, 58], [30, 56, 56], [40, 50, 50], [50, 42, 41], [60, 32, 30], [70, 20, 18], [80, 10, 8], [90, 5, 4]] },                                // 開眼片脚立ち（秒、上限60）
+  step: { better: "high", rows: [[20, 1.62, 1.58], [30, 1.60, 1.56], [40, 1.57, 1.53], [50, 1.53, 1.49], [60, 1.47, 1.43], [70, 1.38, 1.33], [80, 1.24, 1.18], [90, 1.08, 1.02]] }, // 2ステップ値
+  grip: { better: "high", rows: [[20, 46.5, 28.0], [30, 47.0, 29.0], [40, 47.0, 29.5], [50, 46.0, 28.0], [60, 43.0, 26.0], [70, 38.0, 23.5], [80, 32.0, 20.0], [90, 27.0, 17.0]] },   // 握力（kg、良い方の手）
+};
+const AGE_MIN = 20, AGE_MAX = 90;
+// 測定値 → その値が平均にあたる年齢（年代の値を直線でつないで読む）
+function ageOf(key, v, sex) {
+  const n = NORM[key], col = sex === "f" ? 2 : 1, r = n.rows, sgn = n.better === "high" ? 1 : -1;
+  if (sgn * v >= sgn * r[0][col]) return AGE_MIN;
+  for (let i = 0; i + 1 < r.length; i++) {
+    const a = r[i][col], b = r[i + 1][col];
+    if (sgn * v >= sgn * b) return r[i][0] + (r[i + 1][0] - r[i][0]) * (a - v) / (a - b);
+  }
+  return AGE_MAX;
+}
+
+const EX = {
+  iliopsoasStretch: { name: "股関節前面（腸腰筋）のストレッチ", how: "片膝立ちになり、骨盤を後ろに倒したまま体をゆっくり前へ移す。後ろ脚の付け根の前側が伸びる位置で止める。", dose: "30秒×3回／左右", caution: "腰を反らさない。ふらつく場合は台につかまる。" },
+  bridge: { name: "ブリッジ（お尻上げ）", how: "仰向けで膝を立て、お尻を持ち上げて肩〜膝が一直線になったら2秒止め、ゆっくり下ろす。", dose: "10回×2セット", caution: "腰を反りすぎない。" },
+  standHipExt: { name: "立って脚を後ろへ引く運動", how: "台につかまって立ち、膝を伸ばしたまま片脚をゆっくり後ろへ引いて戻す。上体は起こしたまま。", dose: "10回×2セット／左右", caution: "上体を前に倒して代償しない。" },
+  rfStretch: { name: "太もも前面（大腿直筋）のストレッチ", how: "横向きに寝て、上の脚の足首を持ち、かかとをお尻へ近づける。", dose: "30秒×3回／左右", caution: "腰を反らさない。膝に痛みが出る場合は中止。" },
+  seatedKneeFlex: { name: "座って膝を大きく曲げ伸ばし", how: "椅子に座り、足裏を床に滑らせて膝を深く曲げ、伸ばす。テンポよく繰り返す。", dose: "15回×2セット／左右" },
+  marching: { name: "もも上げ", how: "台につかまって立ち、膝を前へ高く引き上げて下ろす。左右交互に。", dose: "20回×2セット", caution: "支持物のそばで行う。" },
+  quadSet: { name: "膝裏でタオルを押す運動（大腿四頭筋）", how: "脚を伸ばして座り、膝裏に丸めたタオルを置く。膝裏でタオルを押しつぶすように太ももに力を入れ5秒保つ。", dose: "10回×2セット／左右" },
+  sitToStand: { name: "椅子からの立ち座り", how: "腕を胸の前で組み、椅子から立ち上がってゆっくり座る。", dose: "10回×2セット", caution: "膝が内側に入らないように。難しければ手すりを使用。" },
+  hamStretch: { name: "太もも裏（ハムストリングス）のストレッチ", how: "椅子に浅く座って片脚を前に伸ばし、背筋を伸ばしたまま上体を前へ倒す。", dose: "30秒×3回／左右" },
+  calfStretch: { name: "ふくらはぎのストレッチ", how: "壁に手をつき、後ろ脚の膝を伸ばしてかかとを床につけたまま体重を前へ移す。", dose: "30秒×3回／左右" },
+  toeRaise: { name: "つま先上げ（すねの筋肉）", how: "座ってかかとを床につけたまま、つま先をできるだけ高く持ち上げて下ろす。", dose: "20回×2セット" },
+  heelStrikeWalk: { name: "かかとから着く歩行練習", how: "「かかと→つま先」を意識して、ゆっくり大きめの歩幅で歩く。", dose: "10m×5往復", caution: "つまずきに注意し、見守り下で開始。" },
+  trunkExt: { name: "胸を張る体幹の伸展運動", how: "椅子に座り両手を頭の後ろで組み、胸を張って背中を伸ばし3秒止める。", dose: "10回×2セット" },
+  metronome: { name: "リズムに合わせた歩行", how: "メトロノーム（スマホアプリ可）の音に合わせて歩く。今の歩調より5〜10%速いテンポから始める。", dose: "2〜3分×3回", caution: "速さより左右均等なリズムを優先。" },
+  weightShift: { name: "左右への体重移動", how: "台の前で肩幅に立ち、左右へゆっくり体重を移して片側に3秒ずつ乗る。弱い側へしっかり乗る。", dose: "10往復×2セット" },
+  stepPractice: { name: "前後へのステップ練習", how: "片脚を一歩前に出して体重を乗せ、元に戻る。弱い側の脚での支持を意識する。", dose: "10回×2セット／左右", caution: "支持物のそばで行う。" },
+  strideWalk: { name: "歩幅を広げる歩行練習", how: "床に目印（テープなど）を貼り、それに合わせていつもより大きな歩幅で歩く。", dose: "10m×5往復" },
+  clamshell: { name: "クラムシェル（お尻の横の筋肉）", how: "横向きに寝て膝を曲げ、かかとをつけたまま上の膝を開いて閉じる。", dose: "15回×2セット／左右", caution: "骨盤が後ろへ倒れないように。" },
+  sideLegRaise: { name: "横向きで脚を上げる運動（中殿筋）", how: "横向きに寝て下の脚は軽く曲げ、上の脚を膝を伸ばしたままやや後ろ斜め上へ持ち上げる。", dose: "10回×2セット／左右", caution: "体を後ろに倒さない。" },
+  singleLeg: { name: "片脚立ち（支持あり）", how: "台につかまり片脚で立つ。骨盤を水平に、上体をまっすぐに保つ。", dose: "10〜30秒×3回／左右", caution: "転倒に注意し、必ず支持物のそばで。" },
+  sideStep: { name: "横歩き", how: "台やキッチンに沿って、つま先を前に向けたまま横へ歩く。", dose: "5m×3往復" },
+  heelRaise: { name: "かかと上げ", how: "台につかまって立ち、つま先立ちになってゆっくり下ろす。", dose: "15回×2セット" },
+};
+
+// このアプリで追加した練習（首・肩・腰まわり）
+Object.assign(EX, {
+  chinTuck: { name: "あご引き運動", how: "背筋を伸ばして座り、目線は正面のまま、あごを水平に後ろへ引いて二重あごを作る。首の後ろが伸びる位置で止める。", dose: "5秒×10回" },
+  pecStretch: { name: "胸のストレッチ（壁）", how: "壁の横に立ち、肩の高さで手のひらを壁につける。腕はそのままで、体を前へ出して胸の前を伸ばす。", dose: "30秒×2回／左右", caution: "肩に痛みが出る場合は手の位置を下げる。" },
+  scapSqueeze: { name: "肩甲骨寄せ", how: "椅子に座って肘を曲げ、胸を張りながら肘を後ろへ引き、左右の肩甲骨を寄せて止める。", dose: "5秒×10回", caution: "肩をすくめない。" },
+  upperTrapStretch: { name: "首の横のストレッチ", how: "背筋を伸ばし、頭を横に倒す。倒した側の手を頭に軽く添え、反対側の首から肩が伸びる位置で止める。", dose: "30秒×2回／左右", caution: "手で強く引っ張らない。しびれが出たら中止。" },
+  pelvicTilt: { name: "腰を床に押しつける運動", how: "仰向けで膝を立て、お腹に力を入れて、腰と床のすき間をつぶすように腰を床へ押しつける。", dose: "5秒×10回", caution: "息を止めない。ベッドの上でも可。" },
+  drawIn: { name: "ドローイン（お腹をへこませる呼吸）", how: "仰向けで膝を立て、鼻から息を吸い、口から吐きながらお腹をゆっくりへこませて保つ。", dose: "10秒×10回", caution: "ベッドの上や座ったままでも可。" },
+  kneeExt: { name: "座って膝を伸ばす運動", how: "椅子に深く座り、片方の膝をまっすぐ伸ばしてつま先を天井へ向け、3秒止めてゆっくり下ろす。", dose: "10回×2セット／左右" },
+  sideBend: { name: "体の横のストレッチ", how: "足を肩幅に開いて立ち、片腕を上げて、反対側へ体をゆっくり倒す。わき腹が伸びる位置で止める。", dose: "30秒×2回／左右", caution: "ふらつく場合は座って行う。" },
+});
+
+// ---------- 練習の棒人間イラスト ----------
+// 1枚 100×84 の座標。床は y=80。人は右向き。角度は「真下=0°、前（右）へ倒すと＋」。
+// 脚・腕は [付け根側の角度, 先端側の角度]、{to:[x,y]}（先端の位置から関節を計算）、{k:[膝],a:[足首]}（位置を直接指定）で指定する。
+const FG = 80, D = Math.PI / 180;
+const ARM_N = [8, 18], ARM_F = [-6, 8];
+const FIG = {
+  iliopsoasStretch: { hl: ["thighN"], cap: ["片膝立ちになる", "体を前へ移す（30秒）"], arrow: { j: "hip", off: [0, -6], bend: -0.5 },
+    p: [{ hip: [42, 62], ln: [-10, -90], fn: 180, lf: [90, 0], an: { to: [55, 57], bend: -1 }, af: { to: [55, 57], bend: -1 } },
+        { hip: [49, 64], ln: [-34, -90], fn: 180, lf: { to: [59, 79] }, an: { to: [60, 60], bend: -1 }, af: { to: [60, 60], bend: -1 } }] },
+  bridge: { hl: ["dot:hip"], props: [{ c: "mat" }], cap: ["仰向けで膝を立てる", "お尻を上げて2秒止める"], arrow: { j: "hip", off: [-7, 0], bend: 0.4 },
+    p: [{ hip: [52, 75], t: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [39, 78], a: [50, 78.5] }, af: { k: [39, 78], a: [50, 78.5] } },
+        { hip: [52, 62], t: -121, hd: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [42, 78], a: [52, 78.5] }, af: { k: [42, 78], a: [52, 78.5] } }] },
+  standHipExt: { hl: ["thighN"], props: [{ c: "table", x: 62, y: 37 }], cap: ["台につかまって立つ", "脚を後ろへ引く"], arrow: { j: "ankN", off: [0, -4], bend: 0.4 },
+    p: [{ hip: [44, 45], an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } },
+        { hip: [44, 45], ln: [-30, -30], an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } }] },
+  rfStretch: { hl: ["thighN"], props: [{ c: "mat" }], cap: ["横向きに寝る", "足首を持ち かかとをお尻へ（30秒）"], arrow: { j: "ankN", off: [0, -5], bend: -0.5 },
+    p: [{ hip: [52, 75], t: -90, ln: [90, 90], lf: [90, 90], an: { k: [38, 78], a: [48, 78.5] }, af: { k: [38, 78], a: [48, 78.5] } },
+        { hip: [52, 75], t: -90, ln: [115, -80], lf: [90, 90], an: { to: [50.7, 70.7] }, af: { k: [38, 78], a: [48, 78.5] } }] },
+  seatedKneeFlex: { hl: ["dot:kneeN"], props: [{ c: "chair", x: 40 }], cap: ["椅子に座る", "足を後ろへ引いて膝を深く曲げる → 伸ばす"], arrow: { j: "ankN", off: [0, -5], bend: 0.4 },
+    p: [{ hip: [40, 62], ln: { to: [64, 79] }, lf: [90, 0], an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } },
+        { hip: [40, 62], ln: { to: [47, 79] }, lf: [90, 0], an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } }] },
+  marching: { hl: ["thighN"], props: [{ c: "table", x: 62, y: 37 }], cap: ["台につかまって立つ", "膝を高く上げる（左右交互）"], arrow: { j: "kneeN", off: [0, -4], bend: -0.4 },
+    p: [{ hip: [44, 45], an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } },
+        { hip: [44, 45], ln: [70, 0], an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } }] },
+  quadSet: { hl: ["thighN"], props: [{ c: "towel", x: 52, y: 78 }], cap: ["脚を伸ばして座り 膝の下にタオル", "膝裏でタオルを押す（5秒）"], arrow: { from: [52, 60], to: [52, 71] },
+    p: [{ hip: [35, 76], t: -15, ln: [90, 90], lf: [90, 90], an: { to: [24, 77], bend: -1 }, af: { to: [24, 77], bend: -1 } },
+        { hip: [35, 76], t: -15, ln: [90, 90], lf: [90, 90], an: { to: [24, 77], bend: -1 }, af: { to: [24, 77], bend: -1 } }] },
+  sitToStand: { hl: ["thighN"], props: [{ c: "chair", x: 40 }], cap: ["腕を組んで座る", "立ち上がる → ゆっくり座る"], arrow: { j: "hip", off: [-6, -2], bend: 0.4 },
+    p: [{ hip: [40, 62], t: 12, ln: { to: [55, 79] }, lf: { to: [55, 79] }, an: [30, 150], af: [30, 150] },
+        { hip: [50, 46], ln: { to: [55, 79] }, lf: { to: [55, 79] }, an: [30, 150], af: [30, 150] }] },
+  hamStretch: { hl: ["thighN"], props: [{ c: "chair", x: 36 }], cap: ["浅く座り 片脚を前に伸ばす", "背筋を伸ばして上体を前へ（30秒）"], arrow: { j: "sh", off: [0, -7], bend: -0.4 },
+    p: [{ hip: [36, 62], ln: { to: [68, 77] }, fn: 70, lf: [90, 0], an: { to: [50, 60], bend: -1 }, af: { to: [50, 60], bend: -1 } },
+        { hip: [36, 62], t: 40, ln: { to: [68, 77] }, fn: 70, lf: [90, 0], an: { to: [62, 66], bend: -1 }, af: { to: [62, 66], bend: -1 } }] },
+  calfStretch: { hl: ["shankN"], props: [{ c: "wall", x: 71 }], cap: ["壁に手をつき 脚を前後に開く", "かかとをつけたまま体重を前へ（30秒）"], arrow: { j: "hip", off: [0, -6], bend: -0.4 },
+    p: [{ hip: [45, 46.5], t: 5, ln: { to: [35, 79] }, fn: 0, lf: { to: [56, 79] }, an: { to: [69, 27], bend: -1 }, af: { to: [69, 27], bend: -1 } },
+        { hip: [50, 48.5], t: 12, ln: { to: [35, 79] }, fn: 0, lf: { to: [57, 79] }, an: { to: [70, 27], bend: -1 }, af: { to: [70, 27], bend: -1 } }] },
+  toeRaise: { hl: ["shankN"], props: [{ c: "chair", x: 40 }], cap: ["椅子に座る", "かかとはつけたまま つま先を上げる"], arrow: { j: "toeN", off: [3, -3], bend: -0.5 },
+    p: [{ hip: [40, 62], ln: [90, 0], lf: [90, 0], an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } },
+        { hip: [40, 62], ln: [90, 0], lf: [90, 0], fn: 30, an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } }] },
+  heelStrikeWalk: { hl: ["dot:heelN"], cap: ["かかとから着く", "足裏全体に体重を乗せる"], arrow: { j: "hip", off: [0, -6], bend: -0.3 },
+    p: [{ hip: [45, 46], t: 3, ln: { to: [58, 78] }, fn: 25, lf: { to: [34, 77] }, ff: -35, an: [-25, -15], af: [25, 40] },
+        { hip: [56, 45], t: 3, ln: { to: [58, 79] }, lf: [25, -10], an: [15, 30], af: [-20, -10] }] },
+  trunkExt: { hl: ["trunk"], props: [{ c: "chair", x: 40 }], cap: ["手を頭の後ろで組む", "胸を張って背中を伸ばす（3秒）"], arrow: { j: "sh", off: [5, -3], bend: -0.5 },
+    p: [{ hip: [40, 62], t: 15, ln: [90, 0], lf: [90, 0], an: { k: [58, 28], a: [43, 31.5] }, af: { k: [58, 28], a: [43, 31.5] } },
+        { hip: [40, 62], t: -8, ln: [90, 0], lf: [90, 0], an: { k: [45.5, 27.5], a: [30.5, 30.8] }, af: { k: [45.5, 27.5], a: [30.5, 30.8] } }] },
+  metronome: { props: [{ c: "note", x: 84, y: 14 }], cap: ["メトロノームを鳴らす", "音に合わせて歩く"], arrow: { j: "hip", off: [0, -6], bend: -0.3 },
+    p: [{ hip: [42, 45], t: 3, ln: { to: [54, 78] }, fn: 15, lf: { to: [31, 77] }, ff: -25, an: [-20, -10], af: [20, 35] },
+        { hip: [56, 45], t: 3, lf: { to: [68, 78] }, ff: 15, ln: { to: [45, 77] }, fn: -25, an: [20, 35], af: [-20, -10] }] },
+  weightShift: { hl: ["thighN", "shankN"], cap: ["肩幅に立つ（正面から見た図）", "横へ体重を移して3秒"], arrow: { j: "hip", off: [0, -5], bend: -0.4 },
+    p: [{ front: 1, hip: [50, 45], ln: { to: [57, 79] }, lf: { to: [43, 79], bend: -1 } },
+        { front: 1, hip: [56, 45.5], t: 4, ln: { to: [57, 79] }, lf: { to: [43, 79], bend: -1 } }] },
+  stepPractice: { hl: ["thighN"], cap: ["まっすぐ立つ", "一歩前へ出て体重を乗せる → 戻る"], arrow: { j: "ankN", off: [0, -5], bend: -0.4 },
+    p: [{ hip: [40, 45] },
+        { hip: [50, 49], ln: { to: [62, 79] }, lf: { to: [40, 77] }, ff: -20, an: [-10, 5], af: [15, 30] }] },
+  strideWalk: { props: [{ c: "tape", xs: [31, 56, 81] }], cap: ["床に目印を貼る", "目印に合わせて大股で歩く"], arrow: { j: "hip", off: [0, -6], bend: -0.3 },
+    p: [{ hip: [44, 46], t: 3, ln: { to: [56, 78] }, fn: 15, lf: { to: [31, 77] }, ff: -25, an: [-20, -10], af: [20, 35] },
+        { hip: [69, 46], t: 3, ln: { to: [56, 77] }, fn: -25, lf: { to: [81, 78] }, ff: 15, an: [20, 35], af: [-20, -10] }] },
+  clamshell: { hl: ["dot:hip"], props: [{ c: "mat" }], cap: ["横向きに寝て膝を曲げる", "かかとをつけたまま上の膝を開く"], arrow: { j: "kneeN", off: [5, 0], bend: -0.5 },
+    p: [{ hip: [48, 74], t: -90, nofeet: 1, lf: { k: [64, 78], a: [50, 79] }, ln: { k: [64, 75.5], a: [50, 77] }, an: { k: [34, 77.5], a: [44, 78] }, af: { k: [34, 77.5], a: [44, 78] } },
+        { hip: [48, 74], t: -90, nofeet: 1, lf: { k: [64, 78], a: [50, 79] }, ln: { k: [59, 59], a: [50, 77] }, an: { k: [34, 77.5], a: [44, 78] }, af: { k: [34, 77.5], a: [44, 78] } }] },
+  sideLegRaise: { hl: ["dot:hip"], props: [{ c: "mat" }], cap: ["横向きに寝る（下の脚は軽く曲げる）", "上の脚を伸ばしたまま上げる"], arrow: { j: "ankN", off: [4, 0], bend: -0.5 },
+    p: [{ hip: [46, 74], t: -90, nofeet: 1, lf: { k: [60, 78], a: [74, 79] }, ln: [90, 90], an: { k: [32, 77.5], a: [42, 78] }, af: { k: [32, 77.5], a: [42, 78] } },
+        { hip: [46, 74], t: -90, nofeet: 1, lf: { k: [60, 78], a: [74, 79] }, ln: [112, 112], an: { k: [32, 77.5], a: [42, 78] }, af: { k: [32, 77.5], a: [42, 78] } }] },
+  singleLeg: { hl: ["thighF", "shankF"], props: [{ c: "table", x: 12, y: 43, w: 22 }], cap: ["台につかまって立つ（正面から見た図）", "片脚で立つ（10〜30秒）"], arrow: { j: "kneeN", off: [5, 0], bend: -0.5 },
+    p: [{ front: 1, hip: [50, 45], ln: { to: [55, 79] }, lf: { to: [45, 79], bend: -1 }, af: { to: [34, 43], bend: -1 } },
+        { front: 1, hip: [49, 45], ln: { k: [56, 59], a: [55, 71] }, lf: { to: [45, 79], bend: -1 }, af: { to: [34, 43], bend: -1 } }] },
+  sideStep: { cap: ["台に沿って立つ（正面から見た図）", "横へ一歩ずつ歩く"], arrow: { j: "ankN", off: [0, -5], bend: -0.4 },
+    p: [{ front: 1, hip: [44, 45], ln: { to: [48, 79] }, lf: { to: [40, 79], bend: -1 } },
+        { front: 1, hip: [52, 46], ln: { to: [64, 79] }, lf: { to: [40, 79], bend: -1 } }] },
+  heelRaise: { hl: ["shankN"], props: [{ c: "table", x: 62, y: 37 }], cap: ["台につかまって立つ", "かかとを上げ ゆっくり下ろす"], arrow: { j: "hip", off: [-7, 0], bend: 0.4 },
+    p: [{ hip: [44, 45], an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } },
+        { hip: [44, 40], fn: -40, ff: -40, an: { to: [63, 37], bend: -1 }, af: { to: [63, 37], bend: -1 } }] },
+};
+
+const add = (a, b, k = 1) => [a[0] + b[0] * k, a[1] + b[1] * k];
+const dirV = a => [Math.sin(a * D), Math.cos(a * D)]; // 手足：真下=0°
+function ik(a, b, l1, l2, s = 1) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy), u = [dx / L, dy / L];
+  if (L >= l1 + l2 - 0.01) return [add(a, u, l1), add(a, u, l1 + l2)];
+  const x = (l1 * l1 - l2 * l2 + L * L) / (2 * L), h = Math.sqrt(Math.max(0, l1 * l1 - x * x));
+  return [add(add(a, u, x), [u[1] * s, -u[0] * s], h), b];
+}
+function limb(spec, root, l1, l2) {
+  if (Array.isArray(spec)) { const m = add(root, dirV(spec[0]), l1); return [m, add(m, dirV(spec[1]), l2)]; }
+  if (spec.k) return [spec.k, spec.a];
+  return ik(root, spec.to, l1, l2, spec.bend ?? 1);
+}
+function solvePose(p) {
+  const t = (p.t || 0) * D, tv = [Math.sin(t), -Math.cos(t)];
+  const hip = p.hip, sh = add(hip, tv, 24);
+  const hv = p.hd != null ? [Math.sin(p.hd * D), -Math.cos(p.hd * D)] : tv;
+  const J = { hip, sh, head: add(sh, hv, 8.5), front: !!p.front, nofeet: !!p.nofeet };
+  const w = p.front ? 1 : 0;
+  J.hipN = add(hip, [4.5 * w, 0]); J.hipF = add(hip, [-4.5 * w, 0]);
+  J.shN = add(sh, [7 * w, 0]); J.shF = add(sh, [-7 * w, 0]);
+  [J.kneeN, J.ankN] = limb(p.ln || (p.front ? { to: [hip[0] + 6, 79] } : [0, 0]), J.hipN, 17, 17);
+  [J.kneeF, J.ankF] = limb(p.lf || (p.front ? { to: [hip[0] - 6, 79], bend: -1 } : [0, 0]), J.hipF, 17, 17);
+  [J.elbN, J.handN] = limb(p.an || (p.front ? [12, 6] : ARM_N), J.shN, 12, 11);
+  [J.elbF, J.handF] = limb(p.af || (p.front ? [-12, -6] : ARM_F), J.shF, 12, 11);
+  for (const s of ["N", "F"]) {
+    const knee = J["knee" + s], ank = J["ank" + s], fa = p["f" + s.toLowerCase()];
+    let fd;
+    if (p.front) fd = [s === "N" ? 1 : -1, 0];
+    else if (fa != null) fd = [Math.cos(fa * D), -Math.sin(fa * D)];
+    else { const L = Math.hypot(ank[0] - knee[0], ank[1] - knee[1]); fd = [(ank[1] - knee[1]) / L, -(ank[0] - knee[0]) / L]; }
+    J["heel" + s] = add(ank, fd, p.front ? -0.5 : -2); J["toe" + s] = add(ank, fd, p.front ? 3.5 : 7);
+  }
+  return J;
+}
+const pt = q => q[0].toFixed(1) + "," + q[1].toFixed(1);
+const pl = (pts, cls) => `<polyline class="${cls}" points="${pts.map(pt).join(" ")}"/>`;
+function drawProps(props) {
+  let g = "";
+  for (const o of props || []) {
+    if (o.c === "chair") g += `<path class="pr" d="M${o.x - 9} ${FG}V64H${o.x + 8}V${FG}M${o.x - 9} 64V40"/>`;
+    if (o.c === "table") { const w = o.w || 20; g += `<path class="pr" d="M${o.x} ${o.y}h${w}M${o.x + 2} ${o.y}V${FG}M${o.x + w - 2} ${o.y}V${FG}"/>`; }
+    if (o.c === "wall") { const s = o.side === "l" ? -1 : 1; g += `<path class="pr" d="M${o.x} 2V${FG + 1}"/><path class="hatch" d="${Array.from({ length: 9 }, (_, i) => `M${o.x} ${10 + i * 8}l${4 * s} -4`).join("")}"/>`; }
+    if (o.c === "mat") g += `<rect class="mat" x="8" y="${FG - 0.5}" width="86" height="2.6" rx="1"/>`;
+    if (o.c === "towel") g += `<ellipse class="towel" cx="${o.x}" cy="${o.y}" rx="5" ry="2.2"/>`;
+    if (o.c === "tape") g += o.xs.map(x => `<rect class="tape" x="${x - 3}" y="${FG - 0.8}" width="6" height="2"/>`).join("");
+    if (o.c === "note") g += `<path class="pr" d="M${o.x - 5} ${o.y + 10}L${o.x - 2} ${o.y - 4}H${o.x + 2}L${o.x + 5} ${o.y + 10}ZM${o.x} ${o.y + 7}L${o.x + 4} ${o.y - 1}"/><text class="nt" x="${o.x - 18}" y="${o.y + 4}">♪</text>`;
+  }
+  return g;
+}
+// 人型ピクトグラム：太い線で手足・胴体を描き、奥側の手足は薄い灰色、手前の手足は縁取りして重なりを見分けやすくする
+function drawFig(J, hl, ghost) {
+  const legPts = s => [J["hip" + s], J["knee" + s], J["ank" + s]];
+  const footPts = s => J.nofeet ? null : [J["heel" + s], J["toe" + s]];
+  const armPts = s => [J["sh" + s], J["elb" + s], J["hand" + s]];
+  const headC = `cx="${J.head[0].toFixed(1)}" cy="${J.head[1].toFixed(1)}"`;
+  if (ghost) {
+    const ls = [legPts("F"), footPts("F"), armPts("F"), legPts("N"), footPts("N"), armPts("N"), [J.hip, J.sh]].filter(Boolean);
+    return `<g class="gh">${ls.map(q => pl(q, "")).join("")}<circle ${headC} r="6"/></g>`;
+  }
+  const seg = { thighN: ["hipN", "kneeN"], shankN: ["kneeN", "ankN"], thighF: ["hipF", "kneeF"], shankF: ["kneeF", "ankF"], trunk: ["hip", "sh"], upperN: ["shN", "elbN"], upperF: ["shF", "elbF"] };
+  const hls = (hl || []).filter(h => !h.startsWith("dot:"));
+  const hlOf = side => hls.filter(h => side ? h.endsWith(side) : h === "trunk").map(h => pl(seg[h].map(k => J[k]), "hl"));
+  const torso = J.front ? pl([J.shF, J.shN], "tr") + pl([J.hipF, J.hipN], "tr") + pl([J.hip, J.sh], "tr") : pl([J.hip, J.sh], "tr");
+  const near = [legPts("N"), footPts("N"), armPts("N")].filter(Boolean);
+  let g = `<g class="far">${[legPts("F"), footPts("F"), armPts("F")].filter(Boolean).map(q => pl(q, "")).join("")}${hlOf("F").join("")}</g>`;
+  g += `<g class="near">${torso}${hlOf("").join("")}<circle class="hd" ${headC} r="6"/>${near.map(q => pl(q, "halo")).join("")}${near.map(q => pl(q, "")).join("")}${hlOf("N").join("")}</g>`;
+  for (const h of hl || []) if (h.startsWith("dot:")) { const q = J[h.slice(4)]; g += `<circle class="hld" cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="5"/>`; }
+  return g;
+}
+function drawArrow(a, A, B) {
+  const p0 = a.from || add(A[a.j], a.off || [0, 0]), p2 = a.to || add(B[a.j], a.off || [0, 0]);
+  const dx = p2[0] - p0[0], dy = p2[1] - p0[1], b = a.bend || 0;
+  const c = [(p0[0] + p2[0]) / 2 - dy * b, (p0[1] + p2[1]) / 2 + dx * b];
+  const ux = p2[0] - c[0], uy = p2[1] - c[1], ul = Math.hypot(ux, uy) || 1, h = 4.5, wv = 3;
+  const bx = p2[0] - ux / ul * h, by = p2[1] - uy / ul * h;
+  return `<path class="ar" d="M${pt(p0)}Q${pt(c)} ${bx.toFixed(1)},${by.toFixed(1)}"/><path class="arh" d="M${pt(p2)}L${(bx - uy / ul * wv).toFixed(1)},${(by + ux / ul * wv).toFixed(1)}L${(bx + uy / ul * wv).toFixed(1)},${(by - ux / ul * wv).toFixed(1)}Z"/>`;
+}
+// 人と道具がちょうど収まる表示範囲（2コマ共通）。細長くなりすぎないよう縦横比を整える
+function figBox(f, A, B) {
+  const xs = [], ys = [];
+  for (const J of [A, B]) for (const v of Object.values(J)) if (Array.isArray(v)) { xs.push(v[0]); ys.push(v[1]); }
+  for (const J of [A, B]) { xs.push(J.head[0] - 7, J.head[0] + 7); ys.push(J.head[1] - 7); }
+  for (const o of f.props || []) {
+    if (o.c === "chair") { xs.push(o.x - 10, o.x + 9); ys.push(40); }
+    if (o.c === "table") { xs.push(o.x, o.x + (o.w || 20)); ys.push(o.y); }
+    if (o.c === "wall") { xs.push(o.x + (o.side === "l" ? -5 : 5)); ys.push(Math.min(...ys)); }
+    if (o.c === "mat") xs.push(10, 92);
+    if (o.c === "tape") xs.push(...o.xs.map(x => x - 4), ...o.xs.map(x => x + 4));
+    if (o.c === "note") { xs.push(o.x - 20, o.x + 6); ys.push(o.y - 5); }
+  }
+  let x0 = Math.min(...xs) - 6, x1 = Math.max(...xs) + 6, y0 = Math.min(...ys) - 5, y1 = FG + 5;
+  let w = x1 - x0, h = y1 - y0;
+  if (w / h < 1) { x0 -= (h - w) / 2; w = h; }
+  if (w / h > 1.8) { h = w / 1.8; y0 = y1 - h; }
+  return [x0, y0, w, h];
+}
+const FIG_TIP = {
+  iliopsoasStretch: "伸びる", rfStretch: "伸びる", hamStretch: "伸びる", calfStretch: "伸びる",
+  seatedKneeFlex: "（膝）をしっかり曲げる", heelStrikeWalk: "（かかと）から着く", trunkExt: "（背中）を伸ばす",
+  weightShift: "の脚に体重を乗せる", singleLeg: "の脚で支える", stepPractice: "の脚に体重を乗せる",
+};
+// 練習1つ分のイラスト（①はじめ → ②動かす）
+function figHTML(key) {
+  const f = FIG[key]; if (!f) return "";
+  const [A, B] = f.p.map(solvePose);
+  const [x0, y0, w, h] = figBox(f, A, B);
+  const vb = `${x0.toFixed(1)} ${y0.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`;
+  const floor = `<rect class="fl" x="${x0}" y="${FG + 1.3}" width="${w}" height="${y0 + h - FG}"/><line class="gr" x1="${x0}" y1="${FG + 1.3}" x2="${x0 + w}" y2="${FG + 1.3}"/>`;
+  const svg = (inner, label) => `<svg viewBox="${vb}" role="img" aria-label="${label}">${floor}${drawProps(f.props)}${inner}</svg>`;
+  const t = FIG_TIP[key];
+  const tipT = !(f.hl && f.hl.length) ? "" : !t ? "の所に力を入れる" : t.startsWith("伸") ? "の所が" + t : t.startsWith("の") ? t : "の所" + t;
+  return `<div class="figw">${tipT ? `<div class="tip"><i></i>オレンジ色${tipT}</div>` : ""}<div class="fig">
+    <figure>${svg(drawFig(A, f.hl), f.cap[0])}<figcaption><b>①</b> ${f.cap[0]}</figcaption></figure>
+    <span class="fa" aria-hidden="true">▶</span>
+    <figure>${svg(drawFig(A, null, true) + drawFig(B, f.hl) + (f.arrow ? drawArrow(f.arrow, A, B) : ""), f.cap[1])}<figcaption><b>②</b> ${f.cap[1]}</figcaption></figure>
+  </div></div>`;
+}
+
+
+Object.assign(FIG, {
+  chinTuck: { cap: ["あごが前に出た姿勢", "あごを水平に引いて首の後ろを伸ばす（5秒）"], props: [{ c: "chair", x: 40 }], arrow: { j: "head", off: [0, -9], bend: 0.3 },
+    p: [{ hip: [40, 62], t: 10, hd: 58, ln: [90, 0], lf: [90, 0], an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } },
+        { hip: [40, 62], t: 0, hd: -4, ln: [90, 0], lf: [90, 0], an: { to: [52, 58], bend: -1 }, af: { to: [52, 58], bend: -1 } }] },
+  pecStretch: { hl: ["upperN"], props: [{ c: "wall", x: 22, side: "l" }], cap: ["壁の横に立ち 手のひらを壁につける", "体を前へ出して胸の前を伸ばす（30秒）"], arrow: { j: "hip", off: [0, -6], bend: -0.4 },
+    p: [{ hip: [44, 45], an: { to: [24, 21] } },
+        { hip: [47, 45.5], t: 3, ln: { to: [56, 79] }, lf: { to: [43, 78] }, ff: -15, an: { to: [24, 21] } }] },
+  scapSqueeze: { hl: ["dot:sh"], props: [{ c: "chair", x: 40 }], cap: ["椅子に座り 肘を曲げる", "肘を後ろへ引いて肩甲骨を寄せる（5秒）"], arrow: { j: "elbN", off: [0, 4], bend: -0.4 },
+    p: [{ hip: [40, 62], ln: [90, 0], lf: [90, 0], an: [25, 90], af: [25, 90] },
+        { hip: [40, 62], t: -4, ln: [90, 0], lf: [90, 0], an: [-40, 90], af: [-40, 90] }] },
+  upperTrapStretch: { hl: ["dot:shF"], cap: ["まっすぐ立つ（正面から見た図）", "頭を横に倒し 手を軽く添える（30秒）"], arrow: { j: "head", off: [0, -8], bend: -0.4 },
+    p: [{ front: 1, hip: [50, 45] },
+        { front: 1, hip: [50, 45], hd: 26, an: { k: [66, 12], a: [57, 7] } }] },
+  pelvicTilt: { hl: ["trunk"], props: [{ c: "mat" }], cap: ["仰向けで膝を立てる", "お腹に力を入れ 腰を床に押しつける（5秒）"], arrow: { from: [42, 61], to: [42, 69] },
+    p: [{ hip: [52, 75], t: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [39, 78], a: [50, 78.5] }, af: { k: [39, 78], a: [50, 78.5] } },
+        { hip: [52, 75], t: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [39, 78], a: [50, 78.5] }, af: { k: [39, 78], a: [50, 78.5] } }] },
+  drawIn: { hl: ["trunk"], props: [{ c: "mat" }], cap: ["仰向けで膝を立て 鼻から息を吸う", "口から吐きながらお腹をへこませる（10秒）"], arrow: { from: [47, 62], to: [47, 70] },
+    p: [{ hip: [52, 75], t: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [39, 78], a: [50, 78.5] }, af: { k: [39, 78], a: [50, 78.5] } },
+        { hip: [52, 75], t: -90, ln: { to: [70, 79] }, lf: { to: [70, 79] }, an: { k: [39, 78], a: [50, 78.5] }, af: { k: [39, 78], a: [50, 78.5] } }] },
+  kneeExt: { hl: ["thighN"], props: [{ c: "chair", x: 40 }], cap: ["椅子に深く座る", "膝をまっすぐ伸ばして3秒 → ゆっくり下ろす"], arrow: { j: "ankN", off: [4, 0], bend: -0.4 },
+    p: [{ hip: [40, 62], ln: [90, 0], lf: [90, 0], an: { to: [45, 63], bend: -1 }, af: { to: [45, 63], bend: -1 } },
+        { hip: [40, 62], ln: [90, 90], lf: [90, 0], an: { to: [45, 63], bend: -1 }, af: { to: [45, 63], bend: -1 } }] },
+  sideBend: { hl: ["trunk"], cap: ["まっすぐ立つ（正面から見た図）", "片腕を上げて体を横に倒す（30秒）"], arrow: { j: "handF", off: [0, -3], bend: -0.4 },
+    p: [{ front: 1, hip: [50, 45] },
+        { front: 1, hip: [50, 45], t: 14, af: [165, 130], an: [10, 5] }] },
+});
+Object.assign(FIG_TIP, { pecStretch: "伸びる", upperTrapStretch: "伸びる", sideBend: "伸びる", pelvicTilt: "（お腹）に力を入れる", drawIn: "（お腹）をへこませる" });
+
+const RF = [
+  { id: "stroke", lv: "em", q: "急に片側の手足が動かしにくい・しびれる、ろれつが回らない、顔の片側が下がっている" },
+  { id: "chest", lv: "em", q: "胸の痛みや締めつけ感、息苦しさがある" },
+  { id: "cauda", lv: "em", q: "尿や便が出にくい・もらしてしまう、お尻や股のまわりがしびれる" },
+  { id: "trauma", lv: "em", q: "転倒やケガのあとから、痛くて体重をかけられない・変形や強い腫れがある" },
+  { id: "sudden", lv: "em", q: "突然の激しい痛み（冷や汗・吐き気を伴う）や、これまでにない激しい頭痛がある" },
+  { id: "fever", lv: "dr", q: "痛みと一緒に発熱がある" },
+  { id: "night", lv: "dr", q: "安静にしていても、夜間も痛みが続く（姿勢を変えても楽にならない）" },
+  { id: "weight", lv: "dr", q: "理由の分からない体重減少がある（半年で数kg以上）" },
+  { id: "cancer", lv: "dr", q: "がんの治療を受けたことがある、または治療中である" },
+  { id: "neuro", lv: "dr", q: "手足のしびれや力の入りにくさが、だんだん強くなっている" },
+  { id: "myelo", lv: "dr", q: "箸・ボタンなど手の細かい動作がしにくくなり、歩くのも不安定になってきた" },
+  { id: "osteo", lv: "dr", q: "骨粗しょう症やステロイド薬の長期使用があり、軽い転倒・尻もちのあとから痛む" },
+  { id: "dvt", lv: "dr", q: "片方のふくらはぎ・脚が腫れていて、赤み・熱っぽさ・痛みがある" },
+  { id: "joint", lv: "dr", q: "関節が赤く腫れて、熱をもっている" },
+  { id: "worse", lv: "dr", q: "痛みが日に日に強くなっている、または今までに経験したことのない痛みがある" },
+];
+
+// ---------- 状態 ----------
+const S = { sex: null, rf: {}, rfOk: false, vals: {}, stand: null, picked: new Set(), shown: false, timers: {} };
+const today = new Date(); $("edate").value = new Date(today.getTime() - today.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+document.querySelectorAll("#sex button").forEach(b => b.addEventListener("click", () => {
+  S.sex = b.dataset.sex; document.querySelectorAll("#sex button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); refresh();
+}));
+for (const id of ["age", "height", "pname", "edate"]) $(id).addEventListener("input", refresh);
+
+// ---------- 安全チェック ----------
+function safety() {
+  const yes = RF.filter(x => S.rf[x.id] === "y"), left = RF.filter(x => !S.rf[x.id]).length;
+  if (yes.some(x => x.lv === "em")) return { st: "em", yes, left };
+  if (left) return { st: "incomplete", yes, left };
+  if (yes.length) return { st: S.rfOk ? "drok" : "dr", yes, left };
+  return { st: "ok", yes, left };
+}
+const safeToExercise = () => ["ok", "drok"].includes(safety().st);
+function renderRFList() {
+  const grp = (lv, title) => `<div class="rfg ${lv}">${title}</div>` + RF.filter(x => x.lv === lv).map(x => `
+    <div class="rfq"><span>${x.q}</span><span class="yn" role="radiogroup" aria-label="${x.q}">
+      <label><input type="radio" class="y" name="rf_${x.id}" value="y"><span>はい</span></label>
+      <label><input type="radio" class="n" name="rf_${x.id}" value="n"><span>いいえ</span></label></span></div>`).join("");
+  $("rfList").innerHTML = grp("em", "すぐに受診が必要なサイン") + grp("dr", "運動の前に受診が必要なサイン");
+  // 新しく「はい」になったサインには、改めて医師の許可確認が要る
+  $("rfList").querySelectorAll("input").forEach(i => i.addEventListener("change", () => { S.rf[i.name.slice(3)] = i.value; if (i.value === "y") S.rfOk = false; updateRF(); }));
+  updateRF();
+}
+function updateRF() {
+  const sf = safety(), box = $("rfResult"), list = sf.yes.length ? `<ul>${sf.yes.map(x => `<li>${x.q}</li>`).join("")}</ul>` : "";
+  box.className = "rfbox " + ({ em: "em", dr: "dr", drok: "dr", ok: "ok" }[sf.st] || "");
+  box.innerHTML = {
+    em: `<b class="t">⚠ すぐに医療機関を受診してください</b>急な症状や強い症状がある場合は、迷わず119番（救急車）を呼んでください。体力テストや運動は行わないでください。${list}`,
+    incomplete: `<b class="t">未回答が ${sf.left} 問あります</b>すべての質問に答えると、体力テストを始められます。`,
+    dr: `<b class="t">体力テストや運動の前に、医師の診察を受けてください</b>${list}<label class="ov"><input type="checkbox" id="rfOk">医師に相談済みで、運動の許可を得ている</label>`,
+    drok: `<b class="t">医師の許可を確認済み</b>症状が変わったら中止して受診してください。${list}<label class="ov"><input type="checkbox" id="rfOk" checked>医師に相談済みで、運動の許可を得ている</label>`,
+    ok: `<b class="t">✓ 受診が必要なサインはありません</b>テスト中に痛みやふらつきが強いときは、無理をせず中止してください。`,
+  }[sf.st];
+  const ov = $("rfOk"); if (ov) ov.addEventListener("change", () => { S.rfOk = ov.checked; updateRF(); });
+  $("tests").hidden = !safeToExercise(); $("testGate").hidden = safeToExercise();
+  $("testGate").className = "gate " + (sf.st === "em" ? "em" : sf.st === "dr" ? "dr" : "incomplete");
+  $("testGate").innerHTML = { em: "<b>体力テストは行わないでください。</b>すぐに医療機関を受診してください。", dr: "<b>体力テストは保留中です。</b>先に医師の診察を受けてください。", incomplete: "②安全チェックにすべて答えると、テストを始められます。" }[sf.st] || "";
+  refresh();
+}
+function rfText() {
+  const sf = safety();
+  if (sf.st === "incomplete") return `未完了（未回答 ${sf.left} 問）`;
+  if (sf.st === "ok") return "受診が必要なサインなし";
+  return `受診が必要なサインあり（${sf.yes.map(x => x.q).join("／")}）${sf.st === "drok" ? "：医師に相談済み・運動の許可あり" : ""}`;
+}
+
+// ---------- 体力テスト ----------
+const TESTS = [
+  { key: "chair", name: "椅子立ち上がり（5回）", ab: "脚の力", unit: "秒", step: 0.1, timer: "up",
+    how: ["高さ40cmくらいの椅子に浅めに座り、腕を胸の前で組む", "「スタート」と同時に、できるだけ速く立つ・座るを5回くり返す（立つときは膝をしっかり伸ばす）", "5回目に座ったところで「ストップ」"],
+    caution: "椅子は壁につけて動かないようにする。ふらつく方は手すりなどのそばで。" },
+  { key: "stance", name: "開眼片脚立ち", ab: "バランス", unit: "秒", step: 0.1, timer: "up", cap: 60,
+    how: ["目を開けて両手を腰に当て、片脚を床から5cmほど上げたら「スタート」", "上げた脚が床につく・支えている足がずれる・手が腰から離れたら「ストップ」（60秒で自動終了）", "左右どちらか立ちやすい脚で2回行い、良いほうを入力"],
+    caution: "必ず壁や机のすぐそばで。人がそばについていると安心です。" },
+  { key: "step", name: "2ステップテスト", ab: "歩く力", unit: "cm", step: 1,
+    how: ["床にスタートの線を決め、両足のつま先を線に合わせる", "できるだけ大股で2歩進み、両足をそろえて止まる（バランスを崩したらやり直し）", "スタートの線から、そろえた足のつま先までの距離（cm）を測る。2回行い良いほうを入力"],
+    caution: "滑りにくい床で、周りに物がない場所で行う。身長の入力が必要です。" },
+  { key: "grip", name: "握力（任意）", ab: "全身の筋力", unit: "kg", step: 0.1, optional: true,
+    how: ["握力計がある場合のみ。人差し指の第2関節がほぼ直角になるように握りの幅を合わせる", "立って腕を自然に下げ、力いっぱい握る", "左右2回ずつ測り、いちばん良い値を入力"], caution: "" },
+];
+const STAND_LV = [
+  [8, "片脚で、10cmの台から立てる"], [7, "片脚で、20cmの台から立てる"], [6, "片脚で、30cmの台から立てる"], [5, "片脚で、40cmの台から立てる"],
+  [4, "両脚なら、10cmの台から立てる"], [3, "両脚なら、20cmの台から立てる"], [2, "両脚なら、30cmの台から立てる"], [1, "両脚なら、40cmの台から立てる"], [0, "両脚でも、40cmの台から立てない"],
+];
+function renderTests() {
+  $("tests").innerHTML = TESTS.map(t => `
+    <div class="test" id="t_${t.key}"><h3>${t.name}<small>${t.ab}</small></h3>
+      <ol>${t.how.map(x => `<li>${x}</li>`).join("")}</ol>${t.caution ? `<div class="caution">⚠ ${t.caution}</div>` : ""}
+      ${t.timer ? `<div class="sw"><output id="sw_${t.key}">0.0</output><span>秒</span><button class="btn primary" type="button" data-sw="${t.key}">スタート</button><button class="btn" type="button" data-swr="${t.key}">リセット</button></div>` : ""}
+      <div class="val"><label class="hint" for="v_${t.key}">記録</label><input type="number" id="v_${t.key}" min="0" step="${t.step}" inputmode="decimal"><span>${t.unit}</span><span class="tage" id="ta_${t.key}"></span></div>
+    </div>`).join("") + `
+    <div class="test"><h3>立ち上がりテスト（任意）<small>ロコモ度</small></h3>
+      <ol><li>40cmの椅子から、腕を組んで両脚で立てるか試す。立てたら片脚（反対の脚は軽く上げる）で試す</li><li>できた場合は30・20・10cmの低い台で同じように試す（台は電話帳や段差などで代用）</li><li>できたいちばん難しいものを選ぶ</li></ol>
+      <div class="caution">⚠ 片脚・低い台は転びやすいテストです。必ずそばに人がいる状態で。不安な場合は行わないでください。</div>
+      <div class="levels">${STAND_LV.map(([v, l]) => `<label><input type="radio" name="stand" value="${v}">${l}</label>`).join("")}<label><input type="radio" name="stand" value="" checked>行わない</label></div>
+    </div>`;
+  TESTS.forEach(t => $("v_" + t.key).addEventListener("input", () => { S.vals[t.key] = parseFloat($("v_" + t.key).value); refresh(); }));
+  document.querySelectorAll("input[name=stand]").forEach(i => i.addEventListener("change", () => { S.stand = i.value === "" ? null : +i.value; refresh(); }));
+  document.querySelectorAll("[data-sw]").forEach(b => b.addEventListener("click", () => toggleSW(b.dataset.sw, b)));
+  document.querySelectorAll("[data-swr]").forEach(b => b.addEventListener("click", () => resetSW(b.dataset.swr)));
+}
+// ストップウォッチ：止めた時点の秒数を記録欄に入れる
+function toggleSW(key, btn) {
+  const T = S.timers[key] = S.timers[key] || {}, cap = TESTS.find(t => t.key === key).cap;
+  if (!T.run) {
+    T.run = true; T.t0 = performance.now(); btn.textContent = "ストップ";
+    const tick = () => {
+      if (!T.run) return;
+      const s = (performance.now() - T.t0) / 1000;
+      $("sw_" + key).textContent = s.toFixed(1);
+      if (cap && s >= cap) return stopSW(key, btn, cap);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  } else stopSW(key, btn);
+}
+function stopSW(key, btn, fixed) {
+  const T = S.timers[key]; T.run = false; btn.textContent = "スタート";
+  const s = fixed ?? (performance.now() - T.t0) / 1000;
+  $("sw_" + key).textContent = s.toFixed(1);
+  const prev = parseFloat($("v_" + key).value), better = NORM[key].better === "high" ? s > prev : s < prev;
+  if (!ok(prev) || better) { $("v_" + key).value = s.toFixed(1); S.vals[key] = +s.toFixed(1); } // 2回目以降は良いほうを残す
+  if (fixed) toast("60秒に達したので終了しました。");
+  refresh();
+}
+function resetSW(key) { const T = S.timers[key]; if (T) T.run = false; $("sw_" + key).textContent = "0.0"; const b = document.querySelector(`[data-sw="${key}"]`); b.textContent = "スタート"; }
+
+// ---------- 計算 ----------
+const realAge = () => parseFloat($("age").value);
+function testValue(key) {
+  const v = S.vals[key];
+  if (!ok(v) || v <= 0) return NaN;
+  if (key === "step") { const h = parseFloat($("height").value); return h > 0 ? Math.floor(v / h * 100) / 100 : NaN; } // 2ステップ値は小数第2位までで判定
+  if (key === "stance") return Math.min(v, 60);
+  return v;
+}
+function compute() {
+  const sex = S.sex || "f", ra = realAge(), items = [];
+  for (const t of TESTS) {
+    const v = testValue(t.key); if (!ok(v)) continue;
+    const a = ageOf(t.key, v, sex);
+    items.push({ key: t.key, name: t.name, ab: t.ab, v, age: a, raw: S.vals[t.key], unit: t.unit });
+  }
+  const body = items.length >= 2 ? Math.round(items.reduce((s, x) => s + x.age, 0) / items.length) : NaN;
+  // ロコモ度（日本整形外科学会の判定基準：立ち上がりテストと2ステップ値）
+  const st = testValue("step"); let loco = 0, why = [];
+  if (S.stand != null) { if (S.stand < 2) { loco = 3; why.push("両脚で30cmの台から立てない"); } else if (S.stand < 3) { loco = Math.max(loco, 2); why.push("両脚で20cmの台から立てない"); } else if (S.stand < 5) { loco = Math.max(loco, 1); why.push("片脚で40cmの台から立てない"); } }
+  if (ok(st)) { const l = st < 0.9 ? 3 : st < 1.1 ? 2 : st < 1.3 ? 1 : 0; if (l) why.push(`2ステップ値 ${st.toFixed(2)}`); loco = Math.max(loco, l); }
+  const locoKnown = S.stand != null || ok(st);
+  return { items, body, ra, loco, locoKnown, why };
+}
+const rate = (age, ra) => !ok(ra) ? "mid" : age <= ra - 5 ? "good" : age <= ra + 5 ? "mid" : "weak";
+const RATE_T = { good: "年齢より若い", mid: "年齢相応", weak: "要トレーニング" };
+const EX_FOR = { chair: ["sitToStand", "kneeExt", "bridge"], stance: ["singleLeg", "weightShift", "sideStep"], step: ["strideWalk", "iliopsoasStretch", "calfStretch"], grip: ["sitToStand", "heelRaise"] };
+const LOCO_T = [
+  ["ロコモではありません", "今の運動機能を保てています。運動習慣を続けましょう。"],
+  ["ロコモ度1", "移動する力の低下が始まっています。筋力やバランスの練習を始めましょう。"],
+  ["ロコモ度2", "移動する力の低下が進んでいます。生活の中で転倒などに注意し、運動を習慣にしましょう。"],
+  ["ロコモ度3", "移動する力の低下が進み、社会参加に支障が出ている状態です。痛みがある場合は医療機関での相談をおすすめします。"],
+];
+
+// ---------- 表示 ----------
+function refresh() {
+  const sf = safety(), r = compute();
+  for (const t of TESTS) { const it = r.items.find(x => x.key === t.key), el = $("ta_" + t.key); if (el) el.textContent = it ? `→ ${Math.round(it.age)}歳相当` : (t.key === "step" && ok(S.vals.step) && !(parseFloat($("height").value) > 0) ? "（身長を入力してください）" : ""); }
+  const miss = !ok(realAge()) ? "①で年齢を入力してください" : !S.sex ? "①で性別を選んでください" : !safeToExercise() ? "②安全チェックを完了してください" : r.items.length < 2 ? `③のテストを2つ以上記録してください（いま ${r.items.length} つ）` : "";
+  $("go").disabled = !!miss; $("goHint").textContent = miss;
+  if (S.shown) { if (miss) { $("secResult").hidden = true; setBar(false); } else renderResult(false); }
+}
+$("go").addEventListener("click", () => { S.shown = true; S.prev = loadHistory(); renderResult(true); saveHistory(); $("secResult").scrollIntoView({ behavior: "smooth", block: "start" }); });
+
+const exItem = e => `<label class="ex"><input type="checkbox" data-ex="${e}" ${S.picked.has(e) ? "checked" : ""}>
+  <span><b>${EX[e].name}</b><span class="dose">${EX[e].dose}</span>
+  <div class="how">${EX[e].how}</div>${EX[e].caution ? `<div class="caution">注意：${EX[e].caution}</div>` : ""}${figHTML(e)}</span></label>`;
+function exPlan(r) {
+  const weak = r.items.filter(x => !ok(r.ra) || x.age > r.ra - 5).sort((a, b) => b.age - a.age);
+  // 弱い能力ごとの練習を順番に1つずつ取り、どの能力の練習も上位に入るようにする
+  const lists = (weak.length ? weak : r.items).map(x => EX_FOR[x.key]), keys = [];
+  for (let i = 0; i < 3; i++) for (const l of lists) if (l[i] && !keys.includes(l[i])) keys.push(l[i]);
+  if (r.loco >= 1) for (const k of ["sitToStand", "singleLeg", "strideWalk"]) if (!keys.includes(k)) keys.push(k);
+  return keys;
+}
+function diffText(d) { return !ok(d) ? "" : d <= -1 ? `実年齢より <span class="good">${-d}歳若い</span>` : d >= 1 ? `実年齢より <span class="weak">${d}歳上</span>` : "実年齢と同じくらい"; }
+function renderResult(resetPicks) {
+  const r = compute(), d = ok(r.body) && ok(r.ra) ? r.body - Math.round(r.ra) : NaN, prev = S.prev;
+  $("secResult").hidden = false;
+  const keys = exPlan(r);
+  if (resetPicks || !S.picked.size) S.picked = new Set(keys.slice(0, 4));
+  const bodyTxt = r.body <= AGE_MIN ? `${AGE_MIN}<small>歳以下</small>` : r.body >= AGE_MAX ? `${AGE_MAX}<small>歳以上</small>` : `${r.body}<small>歳</small>`;
+  let h = `<div class="big"><div class="lbl">あなたのからだ年齢</div><div class="age">${bodyTxt}</div><div class="diff">${diffText(d)}</div>${prev ? `<div class="prev">前回（${prev.date}）：${prev.body}歳</div>` : ""}</div>`;
+  h += `<div class="bars">${r.items.map(x => { const rt = rate(x.age, r.ra), pos = a => Math.max(0, Math.min(100, (a - AGE_MIN) / (AGE_MAX - AGE_MIN) * 100));
+    return `<div class="bar"><div class="top"><span>${x.ab}（${x.name}：${x.key === "step" ? `${x.raw}cm／2ステップ値 ${x.v.toFixed(2)}` : `${x.raw}${x.unit}`}）</span><span class="${rt}">${Math.round(x.age)}歳相当・${RATE_T[rt]}</span></div>
+      <div class="track"><div class="fill ${rt}" style="width:${pos(x.age)}%"></div>${ok(r.ra) ? `<div class="real" style="left:${pos(r.ra)}%" title="実年齢"></div>` : ""}</div><div class="scale"><span>${AGE_MIN}歳</span><span>｜＝実年齢</span><span>${AGE_MAX}歳</span></div></div>`; }).join("")}</div>`;
+  if (r.locoKnown) h += `<div class="loco l${r.loco}"><b>${LOCO_T[r.loco][0]}</b>${r.why.length ? `<span class="hint">（${r.why.join("・")}）</span>` : ""}<div>${LOCO_T[r.loco][1]}</div></div>`;
+  h += `<div class="sub">おすすめの練習（からだ年齢が高めの能力から）</div>` + keys.map(exItem).join("");
+  $("result").innerHTML = h;
+  $("result").querySelectorAll("input[data-ex]").forEach(cb => cb.addEventListener("change", () => { cb.checked ? S.picked.add(cb.dataset.ex) : S.picked.delete(cb.dataset.ex); updateOutputs(r); }));
+  $("ctaBox").innerHTML = `<div class="cta"><b>${CONTACT.title}</b><p>${CONTACT.text}</p>${CONTACT.url ? `<a class="btn primary" href="${esc(CONTACT.url)}" target="_blank" rel="noopener">${CONTACT.label}</a>` : `<span class="hint">（相談窓口の連絡先は準備中です）</span>`}</div>`;
+  setBar(true); updateOutputs(r);
+}
+function setBar(on) { $("printbar").hidden = !on; document.body.classList.toggle("has-bar", on); }
+function recordText(r) {
+  const L = [`【からだ年齢チェック】${$("edate").value.replaceAll("-", "/")}${$("pname").value ? "　" + $("pname").value : ""}`];
+  L.push(`実年齢 ${realAge()}歳・${S.sex === "m" ? "男性" : "女性"}${$("height").value ? `・身長 ${$("height").value}cm` : ""}`);
+  L.push(`安全チェック：${rfText()}`);
+  L.push(`からだ年齢：${r.body}歳（${ok(r.ra) ? (r.body - Math.round(r.ra) >= 0 ? "+" : "") + (r.body - Math.round(r.ra)) + "歳" : ""}）`);
+  for (const x of r.items) L.push(`・${x.name}：${x.raw}${x.unit}${x.key === "step" ? `（2ステップ値 ${x.v.toFixed(2)}）` : ""} → ${Math.round(x.age)}歳相当`);
+  if (r.locoKnown) L.push(`ロコモ度：${LOCO_T[r.loco][0]}${r.why.length ? "（" + r.why.join("・") + "）" : ""}`);
+  L.push("練習：" + [...S.picked].map(e => `${EX[e].name}（${EX[e].dose}）`).join("、"));
+  L.push("※公表データ等をもとにした目安で、診断ではありません。");
+  return L.join("\n");
+}
+function updateOutputs(r) {
+  $("record").value = recordText(r);
+  const name = $("pname").value.trim(), d = ok(r.ra) ? r.body - Math.round(r.ra) : NaN;
+  $("handout").innerHTML = `<h1>からだ年齢チェックの結果</h1><div>${$("edate").value.replaceAll("-", "/")}${name ? "　" + esc(name) + " 様" : ""}　実年齢 ${realAge()}歳</div>
+    <div class="big"><div class="lbl">からだ年齢</div><div class="age">${r.body}<small>歳</small></div><div class="diff">${diffText(d)}</div></div>
+    <table><tr><th>能力</th><th>テスト</th><th>記録</th><th>年齢の目安</th></tr>${r.items.map(x => `<tr><td>${x.ab}</td><td>${x.name}</td><td>${x.raw}${x.unit}</td><td>${Math.round(x.age)}歳相当</td></tr>`).join("")}</table>
+    ${r.locoKnown ? `<p><b>${LOCO_T[r.loco][0]}</b>：${LOCO_T[r.loco][1]}</p>` : ""}
+    <h2 style="font-size:17px;margin-top:12px">あなたの練習メニュー</h2><p>2〜4週間続けて、もう一度測ってみましょう。痛みや体調の変化があれば中止して相談してください。</p>` +
+    [...S.picked].map((k, i) => { const x = EX[k]; return `<div class="hx"><div><b>${i + 1}. ${x.name}</b><div class="dz">回数：${x.dose}</div><div>${x.how}</div>${x.caution ? `<div>⚠ ${x.caution}</div>` : ""}<div class="chk">実施　□月 □火 □水 □木 □金 □土 □日</div></div>${figHTML(k)}</div>`; }).join("") +
+    `<div class="contact"><b>${CONTACT.title}</b><div>${CONTACT.text}</div>${CONTACT.url ? `<div>${CONTACT.label}：${esc(CONTACT.url)}</div>` : ""}</div>`;
+}
+// 前回の結果（この端末の中だけに保存）
+const HKEY = "bodyAgeHistory";
+function loadHistory() { try { const a = JSON.parse(localStorage.getItem(HKEY) || "[]"); return a.length ? a[a.length - 1] : null; } catch { return null; } }
+function saveHistory() {
+  const r = compute(); if (!ok(r.body)) return;
+  try { const a = JSON.parse(localStorage.getItem(HKEY) || "[]"); const date = $("edate").value.replaceAll("-", "/"); const last = a[a.length - 1];
+    if (!(last && last.date === date && last.body === r.body)) { a.push({ date, body: r.body }); localStorage.setItem(HKEY, JSON.stringify(a.slice(-20))); } } catch {}
+}
+$("copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("record").value); toast("コピーしました。"); }
+  catch { $("record").select(); document.execCommand("copy"); toast("コピーしました。"); }
+});
+$("print").addEventListener("click", () => {
+  const root = document.documentElement, theme = root.dataset.theme;
+  root.dataset.theme = "light";
+  const done = () => { if (theme) root.dataset.theme = theme; else delete root.dataset.theme; window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done);
+  window.print();
+});
+renderTests();
+renderRFList();
+</script>
